@@ -1,36 +1,162 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="messagingModule">
 <head>
 <meta charset="UTF-8">
 <title>Messaging</title>
 
 <!-- JQUERY -->
-<script src="https://code.jquery.com/jquery-3.1.1.js" integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"
+	integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+	crossorigin="anonymous"></script>
 
 <!-- BOOTSTRAP CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+	integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+	crossorigin="anonymous">
 
 <!-- BOOTSTRAP THEME -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+	integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
+	crossorigin="anonymous">
 
 <!-- BOOTSTRAP JS -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+	integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+	crossorigin="anonymous"></script>
 
 <!-- TOASTR -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"></link>
+<script
+	src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<link rel="stylesheet" type="text/css"
+	href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"></link>
 
 <!-- ANGULAR JS -->
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular.js"></script>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular.js"></script>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular-route.js"></script>
 
 <!-- ANGULAR SCRIPT -->
-<script src="MessagingController.js"></script>
-<script src="MessagingService.js"></script>
+<script src="Messaging/MessagingController.js" type="text/javascript"></script>
+<script src="Messaging/MessagingService.js" type="text/javascript"></script>
 
 </head>
-<body>
+<body ng-controller="messageController">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-6">
+				<div class="page-header">
+					<h2>Agents:</h2>
+				</div>
+				<ul style="list-style-type: none;">
+					<li ng-repeat="agent in agents" data-toggle="createAgentModal"
+						data-target="#createAgentModal" ng-model="selectedAgent"
+						style="cursor: pointer">{{agent.aid.name}}</li>
+				</ul>
+			</div>
+			<div class="col-md-6">
+				<div class="page-header">
+					<h2>Message:</h2>
+				</div>
+				<div class="form-group">
+					<label for="performative" class="control-label">
+						Preformative: </label> <select class="form-control" id="performative"
+						ng-model="message.performative">
+						<option ng-repeat="performative in performatives"
+							value="{{performative}}">{{performative}}</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="sender" class="control-label"> Sender: </label> <select
+						class="form-control" id="sender" ng-model="message.sender">
+						<option ng-repeat="agent in runningAgents"
+							value="{{agent.aid.name}}">{{agent.aid.name}}</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="receiver" class="control-label"> Receiver: </label> <select
+						class="form-control" id="receiver" ng-model="message.receiver">
+						<option ng-repeat="agent in runningAgents" value="agent.aid.name">{{agent.aid.name}}</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="replyTo" class="control-label"> ReplyTo: </label> <select
+						class="form-control" id="replyTo" ng-model="message.replyTo">
+						<option ng-repeat="agent in runningAgents" value="agent.aid.name">{{agent.aid.name}}</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="content" class="control-label"> Content: </label>
+					<textarea class="form-control" id="content"
+						ng-model="message.content" placeholder="Enter your message"></textarea>
+				</div>
+				<div class="form-group">
+					<label for="language" class="control-label"> Language: </label> <input
+						type="text" class="form-control" id="language"
+						ng-model="message.language" placeholder="Enter language">
+				</div>
+				<div class="form-group">
+					<label for="encoding" class="control-label"> Encoding: </label> <input
+						type="text" class="form-control" id="encoding"
+						ng-model="message.encoding" placeholder="Enter encoding">
+				</div>
+				<div class="form-group">
+					<label for="ontology" class="control-label"> Ontology: </label> <input
+						type="text" class="form-control" id="ontology"
+						ng-model="message.ontology" placeholder="Enter ontology">
+				</div>
+				<div class="form-group">
+					<label for="protocol" class="control-label"> Protocol: </label> <input
+						type="text" class="form-control" id="protocol"
+						ng-model="message.protocol" placeholder="Enter protocol">
+				</div>
+				<div class="form-group">
+					<label for="conversationID" class="control-label">
+						Conversation ID: </label> <input type="text" class="form-control"
+						id="conversationID" ng-model="message.conversationID"
+						placeholder="Enter conversation ID">
+				</div>
+				<div class="form-group">
+					<label for="replyWith" class="control-label"> Reply with: </label>
+					<input type="text" class="form-control" id="replyWith"
+						ng-model="message.replyWith" placeholder="Reply with">
+				</div>
+				<div class="form-group">
+					<label for="replyBy" class="control-label"> Reply by: </label> <input
+						type="text" class="form-control" id="replyBy"
+						ng-model="message.replyBy" placeholder="Reply by">
+				</div>
+				<div class="form-group">
+					<button type="button" class="btn btn-primary"
+						ng-click="sendMessage()">Send Message</button>
+				</div>
+			</div>
+		</div>
+		<!-- Modal -->
+		<div id="createAgentModal" class="modal fade" role="dialog">
+			<div class="modal-dialog">
 
+				<!-- Modal content-->
+				<div class="modal-content">
+					<div class="modal-body">
+						<label for="agentName" class="control-label">Enter name
+							for new {{selectedAgent}} agent:</label> <input type="text"
+							class="form-control" id="agentName" ng-model="agentName"
+							placeholder="Enter new agent name">
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default pull-right"
+							data-dismiss="modal">Cancel</button>
+						<button type="button" class="btn btn-default pull-right"
+							data-dismiss="modal" ng-click="createAgent()">Done</button>
+					</div>
+				</div>
 
-
+			</div>
+		</div>
+	</div>
 </body>
 </html>

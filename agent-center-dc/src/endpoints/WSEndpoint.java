@@ -1,5 +1,6 @@
 package endpoints;
 
+
 import javax.ejb.Singleton;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -18,7 +19,7 @@ public class WSEndpoint {
 
 	@OnMessage
 	public void processMessage(Session session, String message, boolean last) {
-		
+		System.out.println(message);
 	}
 
 	@OnClose
