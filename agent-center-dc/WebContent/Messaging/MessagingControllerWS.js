@@ -1,20 +1,24 @@
-var messagingModule = angular.module('messagingModule');
+var wsMessagingModule = angular.module('messagingModule-ws', []);
 
-messagingModule.controller('messageController', ['$scope', function($scope) {
+wsMessagingModule.controller('messageController-ws', ['$scope', function($scope) {
 	
-	$scope.socket = new WebSocket("ws://localhost:8080/agent-center-dc/agent-center");
-	$scope.communication = {type : "RS"};
+	$scope.socket = new WebSocket('ws://localhost:8080/agent-center-dc/agent-center');
+	$scope.communication = {'type' : 'RS'};
+	$scope.wsMessage = {'type' : '', 'content' : {}};
+	$scope.performatives = [];
 	
 	$scope.socket.onopen = function(message) {
- 		console.log("Connection opened");
+ 		console.log('Connection opened');
  	}
 	
 	$scope.socket.onmessage = function(message) {
 		console.log(message);
+		if(message.type='load')
+		performatives
  	}
  	
 	$scope.socket.onclose = function(message) {
-		console.log("Connection closed");
+		console.log('Connection closed');
  	}
  	
 	$scope.socket.onerror = function(message) {
@@ -40,5 +44,5 @@ messagingModule.controller('messageController', ['$scope', function($scope) {
 	
 }]);
 
-messagingModule.service('communicationService', function() {
+wsMessagingModule.service('communicationService', function() {
 });

@@ -20,6 +20,18 @@ public class WSEndpoint {
 	@OnMessage
 	public void processMessage(Session session, String message, boolean last) {
 		System.out.println(message);
+		
+//		ObjectMapper mapper = new ObjectMapper();
+//        WSMessage wsMessage = null;
+//		try {
+//			wsMessage = mapper.readValue(message, WSMessage.class);
+//			if(wsMessage.getType().equals(Util.LOAD)) {
+//				session.getBasicRemote().sendText(mapper.writeValueAsString(new AgentResponse()));
+//			}
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+		
 	}
 
 	@OnClose
