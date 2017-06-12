@@ -1,10 +1,26 @@
 package entities;
 
-public class AID {
+import java.io.Serializable;
 
+public class AID implements Serializable {
+
+	private static final long serialVersionUID = 7310701926118376290L;
+	
 	private String name;
 	private AgentCenter host;
 	private AgentType type;
+	
+	public AID() {
+	}
+	
+	public AID(String name) {
+		this.name = name;
+	}
+	
+	public AID(String name, AgentType type) {
+		this.name = name;
+		this.type = type;
+	}
 
 	public AID(String name, AgentCenter host, AgentType type) {
 		this.name = name;

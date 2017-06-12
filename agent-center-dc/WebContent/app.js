@@ -1,14 +1,14 @@
-var appModule = angular.module('app' , ['ngRoute', 'messagingModule-rs', 'messagingModule-ws']);
+var appModule = angular.module('app' , ['ngRoute', 'rsMessagingModule', 'wsMessagingModule']);
 
 appModule.config(function($routeProvider) {
     $routeProvider
         .when('/rs', {
             templateUrl : 'Messaging/messaging.html',
-            controller  : 'messageController-rs'
+            controller  : 'rsMessageController'
         })
         .when('/ws', {
             templateUrl : 'Messaging/messaging.html',
-            controller  : 'messageController-ws'
+            controller  : 'wsMessageController'
         })
 });
 

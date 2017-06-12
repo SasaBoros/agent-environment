@@ -1,7 +1,11 @@
 package entities;
 
-public class AgentCenter {
+import java.io.Serializable;
 
+public class AgentCenter implements Serializable {
+
+	private static final long serialVersionUID = -3641284821727036781L;
+	
 	private String alias;
 	private String address;
 

@@ -1,17 +1,18 @@
-package entities;
+package request;
 
 import java.io.Serializable;
 import java.util.Map;
 
 import data.Performative;
+import entities.AID;
 
 public class Message implements Serializable {
-
+	
 	private static final long serialVersionUID = 8313865352707645861L;
-
+	
 	private Performative performative;
 	private AID sender;
-	private AID[] receivers;
+	private AID receivers;
 	private AID replyTo;
 	private String content;
 	private Object contentObj;
@@ -24,31 +25,6 @@ public class Message implements Serializable {
 	private String replyWith;
 	private String inReplyTo;
 	private Long replyBy;
-	
-	public Message() {
-	}
-
-	
-	public Message(Performative performative, AID sender, AID[] receivers, AID replyTo, String content, String language,
-			String encoding, String ontology, String protocol, String conversationId, String replyWith,
-			String inReplyTo, Long replyBy) {
-		super();
-		this.performative = performative;
-		this.sender = sender;
-		this.receivers = receivers;
-		this.replyTo = replyTo;
-		this.content = content;
-		this.language = language;
-		this.encoding = encoding;
-		this.ontology = ontology;
-		this.protocol = protocol;
-		this.conversationId = conversationId;
-		this.replyWith = replyWith;
-		this.inReplyTo = inReplyTo;
-		this.replyBy = replyBy;
-	}
-
-
 
 	public Performative getPerformative() {
 		return performative;
@@ -66,11 +42,11 @@ public class Message implements Serializable {
 		this.sender = sender;
 	}
 
-	public AID[] getReceivers() {
+	public AID getReceivers() {
 		return receivers;
 	}
 
-	public void setReceivers(AID[] receivers) {
+	public void setReceivers(AID receivers) {
 		this.receivers = receivers;
 	}
 
@@ -168,17 +144,6 @@ public class Message implements Serializable {
 
 	public void setReplyBy(Long replyBy) {
 		this.replyBy = replyBy;
-	}
-	
-	@Override
-	public String toString() {
-		StringBuilder message = new StringBuilder();
-		message.append("Message from: " + sender.getName() + ", to: ");
-		for(AID reciever : receivers) {
-			message.append(reciever.getName() + ", ");
-		}
-		message.append("with performative: " + performative + ", and content: " + content);
-		return message.toString();
 	}
 
 }

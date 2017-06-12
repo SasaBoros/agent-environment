@@ -1,48 +1,23 @@
-var wsMessagingModule = angular.module('messagingModule-ws', []);
+var messagingModuleWS = angular.module('wsMessagingModule', []);
 
-wsMessagingModule.controller('messageController-ws', ['$scope', function($scope) {
+messagingModuleWS.controller('wsMessageController', ['$scope', 'wsMessageService', 'wsAgentService', function($scope, wsMessageService, wsAgentService) {
 	
-	$scope.socket = new WebSocket('ws://localhost:8080/agent-center-dc/agent-center');
-	$scope.communication = {'type' : 'RS'};
-	$scope.wsMessage = {'type' : '', 'content' : {}};
-	$scope.performatives = [];
+	wsMessageService.createConnection();
+	$scope.performatives = wsAgentService.performatives;
+	$scope.agents = wsAgentService.agents;
+	$scope.runningAgents = wsAgentService.runningAgents;
 	
-	$scope.socket.onopen = function(message) {
- 		console.log('Connection opened');
- 	}
+	$scope.newAgent = {}
+	$scope.message = {}
 	
-	$scope.socket.onmessage = function(message) {
-		console.log(message);
-		if(message.type='load')
-		performatives
- 	}
- 	
-	$scope.socket.onclose = function(message) {
-		console.log('Connection closed');
- 	}
- 	
-	$scope.socket.onerror = function(message) {
-		console.log(message);
- 	}
-	
-	$scope.publish = function() {
- 		$scope.socket.send($scope.message);
- 	}
-	
-	$scope.sendMessage = function() {
-		if($scope.communication.type == 'RS') {
-			restMessageService.send($scope.message);
-		}
-		else if($scope.communication.type == 'WS') {
-			websocketMessageService.send($scope.message);
-		}
+	$scope.sendACLMessage = function() {
+		wsMessageService.send('MESSAGE', $scope.message);
 	}
 	
-	$scope.createAgent = function() {
-		
+	$scope.startAgent = function() {
+		wsMessageService.send('AGENT', $scope.newAgent);
 	}
 	
 }]);
 
-wsMessagingModule.service('communicationService', function() {
-});
+

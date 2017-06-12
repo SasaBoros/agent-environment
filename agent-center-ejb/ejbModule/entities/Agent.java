@@ -1,12 +1,12 @@
 package entities;
 
-public abstract class Agent {
+import java.io.Serializable;
+
+public abstract class Agent implements Serializable {
+	
+	private static final long serialVersionUID = -350569525151189905L;
 	
 	protected AID id;
-
-	public Agent(AID id) {
-		this.id = id;
-	}
 
 	public AID getId() {
 		return id;

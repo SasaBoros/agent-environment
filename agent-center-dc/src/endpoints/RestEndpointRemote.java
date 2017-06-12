@@ -5,23 +5,30 @@ import java.util.List;
 import javax.ejb.Remote;
 
 import entities.Agent;
+import entities.AgentCenter;
 import entities.AgentType;
 import entities.Message;
-import entities.Performative;
+import data.Performative;
 
 @Remote
 public interface RestEndpointRemote {
 
-	public List<AgentType> getAgentTypes();
+	List<AgentType> getAgentTypes();
 
-	public List<Agent> getRunningAgents();
+	List<Agent> getRunningAgents();
 
-	public void startAgent();
+	void startAgent(String type, String name);
 
-	public void stopAgent();
+	void stopAgent(String aid);
 
-	public void sendMessage(Message message);
+	void sendMessage(Message message);
 
-	public List<Performative> getPerformatives();
+	Performative[] getPerformatives();
+
+	List<AgentCenter> getNodes();
+
+	void registerNode(AgentCenter node);
+
+	void unregisterNode(AgentCenter node);
 
 }

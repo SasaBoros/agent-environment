@@ -1,14 +1,25 @@
 <div class="container-fluid">
 	<div class="row">
 		<div class="col-md-6">
-		 <div class="page-header">
-		 	<h2>Agents:</h2>
+			 <div class="page-header">
+			 	<h2>Agents:</h2>
+			 </div>
+			<div class="list-group">
+				<a class="list-group-item" ng-repeat="agentType in agentTypes" data-toggle="modal" data-target="#createAgentModal" ng-click="agent.type = agentType.name" style="cursor: pointer;font-size : 20px">
+					{{agentType.name}}
+				</a>
+			</div>
+			<div class="page-header">
+		 	<h2>Running agents:</h2>
 		 </div>
-			<ul style="list-style-type: none;">
-				<li ng-repeat="agent in agents" data-toggle="createAgentModal" data-target="#createAgentModal" ng-model="selectedAgent" style="cursor: pointer">
-					{{agent.aid.name}}
-				</li>
-			</ul>
+			<div class="list-group">
+				<ul class="list-group">
+				  <li ng-repeat="runningAgent in runningAgents" class="list-group-item" style="font-size : 20px">
+				  	  {{runningAgent.id.name}}
+					  	<button class="btn-danger btn-xs pull-right" ng-click="stopAgent(runningAgent.id.name)">Stop</button>
+				  </li>
+				</ul>
+			</div>
 		</div>
 		<div class="col-md-6">
 			<div class="page-header"> 
@@ -16,26 +27,25 @@
 			</div>
 			<div class="form-group">
 				<label for="performative" class="control-label"> Preformative: </label>  
-				<select class="form-control" id="performative" ng-model="message.performative">
-				    <option ng-repeat="performative in performatives" value="{{performative}}">{{performative}}</option>
+				<select ng-options="performative as performative for performative in performatives" class="form-control" id="performative" ng-model="message.performative">
+					<option style="background-color: #ccc" value="">Choose performative</option>
 				  </select> 
 			</div>
 			<div class="form-group">
 				<label for="sender" class="control-label"> Sender: </label>  
-				<select class="form-control" id="sender" ng-model="message.sender">
-				    <option ng-repeat="agent in runningAgents" value="{{agent.aid.name}}">{{agent.aid.name}}</option>
+				<select ng-options="runningAgent.id as runningAgent.id.name for runningAgent in runningAgents" class="form-control" id="sender" ng-model="message.sender">
+				  	<option style="background-color: #ccc" value="">Choose sender</option>
 				  </select> 
 			</div>
 			<div class="form-group">
-				<label for="receiver" class="control-label"> Receiver: </label>  
-				<select class="form-control" id="receiver" ng-model="message.receiver">
-				    <option ng-repeat="agent in runningAgents" value="agent.aid.name">{{agent.aid.name}}</option>
+				<label for="receivers" class="control-label"> Receivers: </label>  
+				<select multiple ng-options="runningAgent.id as runningAgent.id.name for runningAgent in runningAgents" class="form-control" id="receivers" ng-model="message.receivers">
 				  </select> 
 			</div>
 			<div class="form-group">
 				<label for="replyTo" class="control-label"> ReplyTo: </label>  
-				<select class="form-control" id="replyTo" ng-model="message.replyTo">
-				    <option ng-repeat="agent in runningAgents" value="agent.aid.name">{{agent.aid.name}}</option>
+				<select ng-options="runningAgent.id as runningAgent.id.name for runningAgent in runningAgents" class="form-control" id="replyTo" ng-model="message.replyTo">
+				  	<option style="background-color: #ccc" value="">Choose to whom to reply to</option>
 				  </select> 
 			</div>
 			<div class="form-group">
@@ -60,15 +70,19 @@
 			</div>
 			<div class="form-group">
 				<label for="conversationID" class="control-label"> Conversation ID: </label>  
-				<input type = "text" class="form-control" id="conversationID" ng-model="message.conversationID" placeholder="Enter conversation ID"> 
+				<input type = "text" class="form-control" id="conversationID" ng-model="message.conversationId" placeholder="Enter conversation ID"> 
 			</div>
 			<div class="form-group">
 				<label for="replyWith" class="control-label"> Reply with: </label>  
 				<input type = "text" class="form-control" id="replyWith" ng-model="message.replyWith" placeholder="Reply with"> 
 			</div>
 			<div class="form-group">
+				<label for="inReplyTo" class="control-label"> In reply to: </label>  
+				<input type = "text" class="form-control" id="inReplyTo" ng-model="message.inReplyTo" placeholder="In reply to"> 
+			</div>
+			<div class="form-group">
 				<label for="replyBy" class="control-label"> Reply by: </label>  
-				<input type = "text" class="form-control" id="replyBy" ng-model="message.replyBy" placeholder="Reply by"> 
+				<input type = "number" class="form-control" id="replyBy" ng-model="message.replyBy" placeholder="Reply by"> 
 			</div>
 			<div class="form-group">
 				<button type="button" class="btn btn-primary" ng-click="sendMessage()">Send Message</button>
@@ -82,12 +96,12 @@
     <!-- Modal content-->
     <div class="modal-content">
       <div class="modal-body">
-        <label for="agentName" class="control-label">Enter name for new {{selectedAgent}} agent:</label>
-		<input type = "text" class="form-control" id="agentName" ng-model="agentName" placeholder="Enter new agent name">
+        <label for="agentName" class="control-label">Enter name for new '{{agent.type}}' agent:</label>
+		<input type = "text" class="form-control" id="agentName" ng-model="agent.name" placeholder="Enter new agent name">
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default pull-right" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-default pull-right" data-dismiss="modal" ng-click="createAgent()">Done</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="startAgent()">Done</button>
       </div>
     </div>
 

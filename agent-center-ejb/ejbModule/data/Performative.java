@@ -1,4 +1,4 @@
-package entities;
+package data;
 
 public enum Performative {
 	ACCEPT_PROPOSAL, AGREE, CANCEL, CALL_FOR_PROPOSAL, 
