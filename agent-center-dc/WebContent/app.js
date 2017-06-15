@@ -13,6 +13,9 @@ appModule.config(function($routeProvider) {
 });
 
 appModule.controller('appController', ['$scope', '$window', function($scope, $window) {
+	
+	$scope.protocol = "";
+	
 	$scope.setController = function(controller) {
 		if(controller == 'Rest') {
 			$window.location.href = "#!/rs";

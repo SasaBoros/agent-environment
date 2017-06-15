@@ -111,7 +111,7 @@ public class RestEndpoint implements RestEndpointRemote {
 	@Path("/node/register")
 	@Override
 	public void registerNode(AgentCenter node) {
-		
+		System.out.println(node.getAddress() + node.getAlias() + "kessa");
 	}
 	
 	@DELETE

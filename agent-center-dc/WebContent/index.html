@@ -50,10 +50,10 @@
 <body ng-controller="appController">
 	<h2>Protocol:</h2>
 	<div class="radio">
-      <label><input type="radio" name="optradio" ng-click="setController('Rest')">Rest</label>
+      <label><input type="radio" name="optradio" ng-click="setController('Rest')" ng-model="protocol" value="rs">Rest</label>
     </div>
     <div class="radio">
-      <label><input type="radio" name="optradio" ng-click="setController('Websocket')">Websocket</label>
+      <label><input type="radio" name="optradio" ng-click="setController('Websocket')" ng-model="protocol" value="ws">Websocket</label>
     </div>
 	<div ng-view></div>
 </body>

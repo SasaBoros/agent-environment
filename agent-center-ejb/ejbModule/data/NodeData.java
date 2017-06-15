@@ -1,21 +1,18 @@
 package data;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.servlet.ServletRequest;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
 
-import org.springframework.web.bind.ServletRequestUtils;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.springframework.http.MediaType;
 
 import entities.AgentCenter;
 import utilities.Util;
@@ -23,59 +20,18 @@ import utilities.Util;
 @Startup
 @Singleton
 public class NodeData {
-	
+
 	private static List<AgentCenter> nodes = new ArrayList<AgentCenter>();
-	
+
 	@PostConstruct
 	void init() {
-		Properties prop = new Properties();
-		InputStream input = null;
-		OutputStream output = null;
-		try {
+		if(System.getProperty(Util.MASTER_NODE) != null) {
+			AgentCenter agentCenter = new AgentCenter(System.getProperty(Util.ALIAS), System.getProperty(Util.THIS_NODE));
+			
+			ResteasyClient client = new ResteasyClientBuilder().build();
 
-			input = new FileInputStream("master_node.properties");
-			
-			
-			prop.load(input);
-			input.close();
-			output = new FileOutputStream("master_node.properties");
-			if(prop.getProperty("ip") == null && prop.getProperty("port") == null) {
-				prop.setProperty("ip", Util.getThisNodeIP());
-				prop.setProperty("port", Util.getThisNodePort());
-
-				prop.store(output, null);
-			}
-			
-			output.close();
-			
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}  
-	}
-	
-	@PreDestroy
-	void clearMasterNodeInfo() {
-		Properties prop = new Properties();
-		OutputStream output = null;
-		InputStream input = null;
-		try {
-
-			input = new FileInputStream("master_node.properties");
-			output = new FileOutputStream("master_node.properties");
-			
-			prop.load(input);
-			if(prop.getProperty("ip").equals(Util.getThisNodeIP()) && prop.getProperty("port").equals(Util.getThisNodePort())) {
-				prop.setProperty("ip", null);
-				prop.setProperty("port", null);
-
-				prop.store(output, null);
-			}
-			
-			input.close();
-			output.close();
-			
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}  
+			ResteasyWebTarget target = client.target("http://" + System.getProperty(Util.MASTER_NODE) + "/agent-center-dc/rest/agent-center/node/register");
+			target.request().post(Entity.entity(agentCenter, "application/json"));
+		}
 	}
 }

@@ -9,6 +9,9 @@ public class AgentCenter implements Serializable {
 	private String alias;
 	private String address;
 
+	public AgentCenter() {
+	}
+	
 	public AgentCenter(String alias, String address) {
 		this.alias = alias;
 		this.address = address;

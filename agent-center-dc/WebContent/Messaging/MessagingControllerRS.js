@@ -1,8 +1,11 @@
 var rsMessagingModule = angular.module('rsMessagingModule', []);
 
-rsMessagingModule.controller('rsMessageController', [ '$scope', '$interval',
+rsMessagingModule.controller('rsMessageController', [ '$scope', '$interval', '$window',
 		'rsResourceService', 'rsMessageService', 'rsAgentService',
-		function($scope, $interval, rsResourceService, rsMessageService, rsAgentService) {
+		function($scope, $interval, $window, rsResourceService, rsMessageService, rsAgentService) {
+			
+			
+			$scope.$parent.protocol = 'rs';
 			
 			$scope.agent = {type : "", name: ""};
 			$scope.data = {performatives : new Array(), agentTypes : new Array(), runningAgents : new Array()};
@@ -80,6 +83,12 @@ rsMessagingModule.controller('rsMessageController', [ '$scope', '$interval',
 				rsAgentService.stopAgent($scope.data.runningAgents, agentName);
 				
 			}
+			
+			$scope.$on('$destroy',function(){
+				$interval.cancel($scope.performativeInterval);
+				$interval.cancel($scope.agentTypesInterval);
+				$interval.cancel($scope.runningAgentsInterval);
+			});
 			
 
 }]);

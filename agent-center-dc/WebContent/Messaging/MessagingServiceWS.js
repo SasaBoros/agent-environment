@@ -10,7 +10,6 @@ messagingModuleWS.service('wsMessageService', function() {
 		}
 		else if(messageType == 'AGENT_TYPES') {
 			data.agentTypes = content;
-			console.log(data.agentTypes)
 		}
 		else if(messageType == 'RUNNING_AGENTS') {
 			for(var i = 0; i < content.length;i++) {
@@ -22,7 +21,6 @@ messagingModuleWS.service('wsMessageService', function() {
 				}
 			}
 			data.runningAgents = content;
-			console.log(data.runningAgents)
 		}
 		else if(messageType == 'STARTED_AGENT') {
 			data.runningAgents.push(content);

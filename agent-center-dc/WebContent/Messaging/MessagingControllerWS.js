@@ -2,6 +2,8 @@ var messagingModuleWS = angular.module('wsMessagingModule', []);
 
 messagingModuleWS.controller('wsMessageController', ['$scope', 'wsMessageService', function($scope, wsMessageService) {
 	
+	$scope.$parent.protocol = 'ws';
+	
 	$scope.data = {performatives : new Array(), agentTypes : new Array(), runningAgents : new Array()};
 	
 	$scope.message = {
@@ -29,7 +31,6 @@ messagingModuleWS.controller('wsMessageController', ['$scope', 'wsMessageService
 	 	}
 		
 	$scope.socket.onmessage = function(message) {
-			console.log(message.data);
 			wsMessageService.handleWSMessage($scope.data, message.data);
 			$scope.$apply();
 	 	}
