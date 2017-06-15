@@ -5,9 +5,9 @@ rsMessagingModule.service('rsResourceService', ['$http', function($http) {
 			  method: 'GET',
 			  url: '../agent-center-dc/rest/agent-center/agents/performatives'
 			}).then(function successCallback(response) {
-					return response.data;
+				return response;
 			  }, function errorCallback(response) {
-				  console.log(response);
+				  return response;
 			  });
 	}
 	
@@ -16,9 +16,9 @@ rsMessagingModule.service('rsResourceService', ['$http', function($http) {
 			  method: 'GET',
 			  url: '../agent-center-dc/rest/agent-center/agents/types'
 			}).then(function successCallback(response) {
-				return response.data;
+				return response;
 			  }, function errorCallback(response) {
-				  console.log(response);
+				  return response;
 			  });
 	}
 	
@@ -27,9 +27,9 @@ rsMessagingModule.service('rsResourceService', ['$http', function($http) {
 			  method: 'GET',
 			  url: '../agent-center-dc/rest/agent-center/agents/running-agents'
 			}).then(function successCallback(response) {
-				return response.data;
+				return response;
 			  }, function errorCallback(response) {
-				  console.log(response);
+				  return response;
 			  });
 		}
 	
@@ -43,31 +43,55 @@ rsMessagingModule.service('rsMessageService', ['$http', function($http) {
 			toastr.warning("All fields are required.");
 			return;
 		}
+		
+		var self = this;
 		$http({
 			  method: 'POST',
 			  url: '../agent-center-dc/rest/agent-center/message',
 			  data: message
 			}).then(function successCallback(response) {
-				
+				 self.handleErrorResponse(response.data)
 			  }, function errorCallback(response) {
 				  
 			  });
+	}
+	this.handleErrorResponse = function(error) {
+		if(error == 1) {
+			toastr.error("Agent sender is no longer running.");
 		}
+		else if(error == 2) {
+			toastr.error("One or more agent recievers are no longer running.");
+		}
+		else if(error == 3) {
+			toastr.error("Agent to reply to is no longer running.");
+		}
+		else {
+			toastr.info("Message successfuly sent.");
+		}
+	}
 }]);
 
 rsMessagingModule.service('rsAgentService', ['$http', function($http) { 
 	this.startAgent = function(agent) {
+		var self = this;
 		$http({
 			  method: 'PUT',
 			  url: '../agent-center-dc/rest/agent-center/agents/agent/start/' + agent.type + "/" + agent.name
 			}).then(function successCallback(response) {
-				
+				 self.handleErrorResponse(response.data);
+				 agent.name = "";
 			  }, function errorCallback(response) {
 				  
 			  });
 	}
 	
-	this.stopAgent = function(agentName) {
+	this.stopAgent = function(runningAgents, agentName, index) {
+		for(var i = 0;i < runningAgents.length; i++) {
+			if(runningAgents[i].id.name == agentName) {
+				runningAgents.splice(i, 1);
+				break;
+			}
+		}
 		$http({
 			  method: 'DELETE',
 			  url: '../agent-center-dc/rest/agent-center/agents/agent/stop/' + agentName
@@ -76,5 +100,14 @@ rsMessagingModule.service('rsAgentService', ['$http', function($http) {
 			  }, function errorCallback(response) {
 				  
 			  });
+	}
+	
+	this.handleErrorResponse = function(error) {
+		if(error == 4) {
+			toastr.error("Agent with that name is already started.");
+		}	
+		else {
+			toastr.info("Agent successfuly started.");
+		}
 	}
 }]);

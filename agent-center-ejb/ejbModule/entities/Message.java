@@ -3,8 +3,6 @@ package entities;
 import java.io.Serializable;
 import java.util.Map;
 
-import data.Performative;
-
 public class Message implements Serializable {
 
 	private static final long serialVersionUID = 8313865352707645861L;

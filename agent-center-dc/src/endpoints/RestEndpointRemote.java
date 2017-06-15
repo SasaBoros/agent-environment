@@ -8,22 +8,23 @@ import entities.Agent;
 import entities.AgentCenter;
 import entities.AgentType;
 import entities.Message;
-import data.Performative;
+import entities.Performative;
 
 @Remote
 public interface RestEndpointRemote {
 
 	List<AgentType> getAgentTypes();
 
+	Performative[] getPerformatives();
+	
 	List<Agent> getRunningAgents();
 
-	void startAgent(String type, String name);
+	Integer startAgent(String type, String name);
 
-	void stopAgent(String aid);
+	Integer stopAgent(String aid);
 
-	void sendMessage(Message message);
+	Integer sendMessage(Message message);
 
-	Performative[] getPerformatives();
 
 	List<AgentCenter> getNodes();
 

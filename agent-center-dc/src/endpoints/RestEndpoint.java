@@ -22,7 +22,8 @@ import entities.Agent;
 import entities.AgentCenter;
 import entities.AgentType;
 import entities.Message;
-import data.Performative;
+import entities.Performative;
+import messaging.ErrorResponse;
 
 
 
@@ -36,6 +37,7 @@ public class RestEndpoint implements RestEndpointRemote {
 	@Path("/agents/types")
 	@Override
 	public List<AgentType> getAgentTypes() {
+		System.out.println("Get types");
 		List<AgentType> agentTypes = new ArrayList<AgentType>();
 		agentTypes.add(new AgentType("Ping", "Egg"));
 		agentTypes.add(new AgentType("Pong", "Egg"));
@@ -44,6 +46,16 @@ public class RestEndpoint implements RestEndpointRemote {
 		return agentTypes;
 		
 	}
+	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/agents/performatives")
+	@Override
+	public Performative[] getPerformatives() {
+		// TODO Auto-generated method stub
+		System.out.println("Get runningAgents");
+		return Performative.values();
+	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -51,6 +63,7 @@ public class RestEndpoint implements RestEndpointRemote {
 	@Override
 	public List<Agent> getRunningAgents() {
 		List<Agent> agents = new ArrayList<Agent>();
+		System.out.println("Get runningAgents");
 		agents.add(new Ping(new AID("ping1")));
 		agents.add(new Pong(new AID("pong1")));
 		agents.add(new MapReduce(new AID("mapReduce1")));
@@ -61,37 +74,29 @@ public class RestEndpoint implements RestEndpointRemote {
 	@PUT
 	@Path("/agents/agent/start/{type}/{name}")
 	@Override
-	public void startAgent(@PathParam("type")String type, @PathParam("name")String name) {
+	public Integer startAgent(@PathParam("type")String type, @PathParam("name")String name) {
 		System.out.println(type + " " + name);
-
+		return ErrorResponse.ERRORFREE;
 	}
 
 	@DELETE
 	@Path("/agents/agent/stop/{aid}")
 	@Override
-	public void stopAgent(@PathParam("aid") String aid) {
+	public Integer stopAgent(@PathParam("aid") String aid) {
 		System.out.println(aid);
-
+		return ErrorResponse.ERRORFREE;
 	}
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("/message")
 	@Override
-	public void sendMessage(Message message) {
+	public Integer sendMessage(Message message) {
 		// TODO Auto-generated method stub
 		System.out.println(message);
+		return ErrorResponse.ERRORFREE;
 	}
 
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/agents/performatives")
-	@Override
-	public Performative[] getPerformatives() {
-		// TODO Auto-generated method stub
-		return Performative.values();
-	}
-	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/nodes")

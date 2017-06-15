@@ -5,7 +5,7 @@
 			 	<h2>Agents:</h2>
 			 </div>
 			<div class="list-group">
-				<a class="list-group-item" ng-repeat="agentType in agentTypes" data-toggle="modal" data-target="#createAgentModal" ng-click="agent.type = agentType.name" style="cursor: pointer;font-size : 20px">
+				<a class="list-group-item" ng-repeat="agentType in data.agentTypes" data-toggle="modal" data-target="#createAgentModal" ng-click="agent.type = agentType.name" style="cursor: pointer;font-size : 20px">
 					{{agentType.name}}
 				</a>
 			</div>
@@ -14,7 +14,7 @@
 		 </div>
 			<div class="list-group">
 				<ul class="list-group">
-				  <li ng-repeat="runningAgent in runningAgents" class="list-group-item" style="font-size : 20px">
+				  <li ng-repeat="runningAgent in data.runningAgents" class="list-group-item" style="font-size : 20px">
 				  	  {{runningAgent.id.name}}
 					  	<button class="btn-danger btn-xs pull-right" ng-click="stopAgent(runningAgent.id.name)">Stop</button>
 				  </li>
@@ -27,24 +27,24 @@
 			</div>
 			<div class="form-group">
 				<label for="performative" class="control-label"> Preformative: </label>  
-				<select ng-options="performative as performative for performative in performatives" class="form-control" id="performative" ng-model="message.performative">
+				<select ng-options="performative as performative for performative in data.performatives" class="form-control" id="performative" ng-model="message.performative">
 					<option style="background-color: #ccc" value="">Choose performative</option>
 				  </select> 
 			</div>
 			<div class="form-group">
 				<label for="sender" class="control-label"> Sender: </label>  
-				<select ng-options="runningAgent.id as runningAgent.id.name for runningAgent in runningAgents" class="form-control" id="sender" ng-model="message.sender">
+				<select ng-options="runningAgent.id as runningAgent.id.name for runningAgent in data.runningAgents" class="form-control" id="sender" ng-model="message.sender">
 				  	<option style="background-color: #ccc" value="">Choose sender</option>
 				  </select> 
 			</div>
 			<div class="form-group">
 				<label for="receivers" class="control-label"> Receivers: </label>  
-				<select multiple ng-options="runningAgent.id as runningAgent.id.name for runningAgent in runningAgents" class="form-control" id="receivers" ng-model="message.receivers">
+				<select multiple ng-options="runningAgent.id as runningAgent.id.name for runningAgent in data.runningAgents" class="form-control" id="receivers" ng-model="message.receivers">
 				  </select> 
 			</div>
 			<div class="form-group">
 				<label for="replyTo" class="control-label"> ReplyTo: </label>  
-				<select ng-options="runningAgent.id as runningAgent.id.name for runningAgent in runningAgents" class="form-control" id="replyTo" ng-model="message.replyTo">
+				<select ng-options="runningAgent.id as runningAgent.id.name for runningAgent in data.runningAgents" class="form-control" id="replyTo" ng-model="message.replyTo">
 				  	<option style="background-color: #ccc" value="">Choose to whom to reply to</option>
 				  </select> 
 			</div>
