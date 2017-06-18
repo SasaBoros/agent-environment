@@ -31,15 +31,14 @@ public class WSEndpoint {
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			session.getBasicRemote().sendText(mapper.writeValueAsString(new WSMessage(WSMessageType.PERFORMATIVES, mapper.writeValueAsString(Performative.values()))));
-			session.getBasicRemote().sendText(mapper.writeValueAsString(new WSMessage(WSMessageType.AGENT_TYPES, mapper.writeValueAsString(AgentData.getAgentTypes()))));
-			session.getBasicRemote().sendText(mapper.writeValueAsString(new WSMessage(WSMessageType.RUNNING_AGENTS, mapper.writeValueAsString(AgentData.getRunningAgents()))));
+			session.getBasicRemote().sendText(mapper.writeValueAsString(new WSMessage(WSMessageType.AGENT_TYPES, mapper.writeValueAsString(AgentData.getNodeAgentTypes().get(System.getProperty(Util.THIS_NODE))))));
+			session.getBasicRemote().sendText(mapper.writeValueAsString(new WSMessage(WSMessageType.RUNNING_AGENTS, mapper.writeValueAsString(AgentData.getNodeRunningAgents().get(System.getProperty(Util.THIS_NODE))))));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			System.err.println("AAAAAAAAAAAAAAAAAAAAAA");
 			e.printStackTrace();
 		}
 		
-		System.out.println(Util.getMasterNodePort());
 		
 	}
 

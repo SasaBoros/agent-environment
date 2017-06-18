@@ -12,11 +12,21 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.jboss.resteasy.client.jaxrs.internal.ClientResponse;
 
 import agents.MapReduce;
 import agents.Ping;
 import agents.Pong;
+import data.AgentData;
+import data.NodeData;
 import entities.AID;
 import entities.Agent;
 import entities.AgentCenter;
@@ -24,6 +34,7 @@ import entities.AgentType;
 import entities.Message;
 import entities.Performative;
 import messaging.ErrorResponse;
+import utilities.Util;
 
 
 
@@ -37,13 +48,8 @@ public class RestEndpoint implements RestEndpointRemote {
 	@Path("/agents/types")
 	@Override
 	public List<AgentType> getAgentTypes() {
-		System.out.println("Get types");
-		List<AgentType> agentTypes = new ArrayList<AgentType>();
-		agentTypes.add(new AgentType("Ping", "Egg"));
-		agentTypes.add(new AgentType("Pong", "Egg"));
-		agentTypes.add(new AgentType("MapReduce", "Egg"));
 		
-		return agentTypes;
+		return AgentData.getNodeAgentTypes().get(System.getProperty(Util.THIS_NODE));
 		
 	}
 	
@@ -62,13 +68,8 @@ public class RestEndpoint implements RestEndpointRemote {
 	@Path("/agents/running-agents")
 	@Override
 	public List<Agent> getRunningAgents() {
-		List<Agent> agents = new ArrayList<Agent>();
-		System.out.println("Get runningAgents");
-		agents.add(new Ping(new AID("ping1")));
-		agents.add(new Pong(new AID("pong1")));
-		agents.add(new MapReduce(new AID("mapReduce1")));
-		agents.add(new MapReduce(new AID("mapReduce2")));
-		return agents;
+		
+		return AgentData.getNodeRunningAgents().get(System.getProperty(Util.THIS_NODE));
 	}
 
 	@PUT
@@ -111,7 +112,23 @@ public class RestEndpoint implements RestEndpointRemote {
 	@Path("/node/register")
 	@Override
 	public void registerNode(AgentCenter node) {
-		System.out.println(node.getAddress() + node.getAlias() + "kessa");
+		NodeData.addNode(node);
+		if(System.getProperty(Util.MASTER_NODE) == null) {
+			ResteasyClient client = new ResteasyClientBuilder().build();
+
+			ResteasyWebTarget target = client.target("http://" + node.getAddress() + "/agent-center-dc/rest/agent-center/agents/types");
+			List<AgentType> nodeAgentTypes = target.request().get(new GenericType<ArrayList<AgentType>>() {});
+			AgentData.putNodeAgentTypes(node.getAddress(), nodeAgentTypes);
+			
+			for(AgentCenter n : NodeData.getNodes()) {
+				if(n.getAddress().equals(node.getAddress()))
+					continue;
+				
+				client = new ResteasyClientBuilder().build();
+				target = client.target("http://" + n.getAddress() + "/agent-center-dc/rest/agent-center/node/register");
+				target.request().post(Entity.entity(node, MediaType.APPLICATION_JSON));
+			}
+		}
 	}
 	
 	@DELETE
