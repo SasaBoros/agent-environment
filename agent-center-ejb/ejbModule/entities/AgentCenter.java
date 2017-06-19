@@ -12,6 +12,10 @@ public class AgentCenter implements Serializable {
 	public AgentCenter() {
 	}
 	
+	public AgentCenter(String address) {
+		this.address = address;
+	}
+	
 	public AgentCenter(String alias, String address) {
 		this.alias = alias;
 		this.address = address;

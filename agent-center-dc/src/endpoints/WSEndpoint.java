@@ -14,13 +14,12 @@ import javax.websocket.server.ServerEndpoint;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import agents.Ping;
-import data.AgentData;
+import data.NodeData;
 import entities.AID;
 import entities.Message;
 import entities.Performative;
 import messaging.WSMessage;
 import messaging.WSMessageType;
-import utilities.Util;
 
 @ServerEndpoint("/agent-center")
 @Singleton
@@ -31,8 +30,8 @@ public class WSEndpoint {
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			session.getBasicRemote().sendText(mapper.writeValueAsString(new WSMessage(WSMessageType.PERFORMATIVES, mapper.writeValueAsString(Performative.values()))));
-			session.getBasicRemote().sendText(mapper.writeValueAsString(new WSMessage(WSMessageType.AGENT_TYPES, mapper.writeValueAsString(AgentData.getNodeAgentTypes().get(System.getProperty(Util.THIS_NODE))))));
-			session.getBasicRemote().sendText(mapper.writeValueAsString(new WSMessage(WSMessageType.RUNNING_AGENTS, mapper.writeValueAsString(AgentData.getNodeRunningAgents().get(System.getProperty(Util.THIS_NODE))))));
+			session.getBasicRemote().sendText(mapper.writeValueAsString(new WSMessage(WSMessageType.AGENT_TYPES, mapper.writeValueAsString(NodeData.getAllAgentTypes()))));
+			session.getBasicRemote().sendText(mapper.writeValueAsString(new WSMessage(WSMessageType.RUNNING_AGENTS, mapper.writeValueAsString(NodeData.getRunningAgents()))));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			System.err.println("AAAAAAAAAAAAAAAAAAAAAA");
