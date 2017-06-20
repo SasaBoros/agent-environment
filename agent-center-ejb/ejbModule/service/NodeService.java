@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
@@ -14,24 +15,36 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
 import data.NodeData;
-import entities.AID;
-import entities.Agent;
 import entities.AgentCenter;
 import entities.AgentType;
-import messaging.ErrorResponse;
+import utilities.Util;
 
 @Stateless
-public class RestEndpointService {
+public class NodeService {
+
+	@Inject
+	private NodeData nodeData;
+
+	public List<AgentCenter> getNodes() {
+		return nodeData.getNodes();
+	}
+
+	public void setNodes(List<AgentCenter> nodes) {
+		nodeData.setNodes(nodes);
+	}
+
+	public void addNode(AgentCenter node) {
+		nodeData.addNode(node);
+	}
 
 	public void updateSystemWithNewNodeData(AgentCenter node) {
 		if (System.getProperty(Util.MASTER_NODE) != null) {
 			return;
 		}
 		try {
-
 			List<AgentType> nodeAgentTypes = getNewNodeAgentTypes(node);
 
-			NodeData.addNodeAgentTypes(node.getAddress(), nodeAgentTypes);
+			nodeData.addNodeAgentTypes(node.getAddress(), nodeAgentTypes);
 
 			updateExistingNodes(node, nodeAgentTypes);
 			updateNewNode(node);
@@ -47,7 +60,7 @@ public class RestEndpointService {
 		ResteasyClient client = new ResteasyClientBuilder().build();
 
 		ResteasyWebTarget target = client
-				.target("http://" + node.getAddress() + "/agent-center-dc/rest/agent-center/agents/types");
+				.target("http://" + node.getAddress() + "/agent-center-dc/rest/agent-center/agent-type/agent-types");
 
 		List<AgentType> nodeAgentTypes = null;
 		try {
@@ -66,7 +79,7 @@ public class RestEndpointService {
 
 		ResteasyClient client = new ResteasyClientBuilder().build();
 
-		for (AgentCenter n : NodeData.getNodes()) {
+		for (AgentCenter n : nodeData.getNodes()) {
 			if (n.getAddress().equals(node.getAddress())) {
 				continue;
 			}
@@ -76,8 +89,8 @@ public class RestEndpointService {
 						.target("http://" + n.getAddress() + "/agent-center-dc/rest/agent-center/node/register");
 				target.request().post(Entity.entity(node, MediaType.APPLICATION_JSON));
 
-				target = client.target("http://" + n.getAddress() + "/agent-center-dc/rest/agent-center/agents/types/"
-						+ node.getAddress());
+				target = client.target("http://" + n.getAddress()
+						+ "/agent-center-dc/rest/agent-center/agent-type/node-agent-types/" + node.getAddress());
 				target.request().post(Entity.entity(nodeAgentTypes, MediaType.APPLICATION_JSON));
 			} catch (Exception e) {
 				// One of nodes stopped working.
@@ -88,35 +101,34 @@ public class RestEndpointService {
 	private void updateNewNode(AgentCenter node) {
 
 		ResteasyClient client = new ResteasyClientBuilder().build();
-
 		ResteasyWebTarget target = client
-				.target("http://" + node.getAddress() + "/agent-center-dc/rest/agent-center/node/register-nodes");
+				.target("http://" + node.getAddress() + "/agent-center-dc/rest/agent-center/node/nodes");
 		try {
-			target.request().post(Entity.entity(NodeData.getNodes().stream().filter(n -> {
+			target.request().post(Entity.entity(nodeData.getNodes().stream().filter(n -> {
 				return !n.getAddress().equals(node.getAddress());
 			}).collect(Collectors.toList()), MediaType.APPLICATION_JSON));
 		} catch (Exception e) {
 			e.printStackTrace();
-			target.request().post(Entity.entity(NodeData.getNodes().stream().filter(n -> {
+			target.request().post(Entity.entity(nodeData.getNodes().stream().filter(n -> {
 				return !n.getAddress().equals(node.getAddress());
 			}).collect(Collectors.toList()), MediaType.APPLICATION_JSON));
 		}
-
-		target = client.target("http://" + node.getAddress() + "/agent-center-dc/rest/agent-center/agents/types");
+		target = client
+				.target("http://" + node.getAddress() + "/agent-center-dc/rest/agent-center/agent-type/agent-types");
 		try {
-			target.request().post(Entity.entity(NodeData.getNodesAgentTypes(), MediaType.APPLICATION_JSON));
+			target.request().post(Entity.entity(nodeData.getNodeAgentTypes(), MediaType.APPLICATION_JSON));
 		} catch (Exception e) {
 			e.printStackTrace();
-			target.request().post(Entity.entity(NodeData.getNodesAgentTypes(), MediaType.APPLICATION_JSON));
+			target.request().post(Entity.entity(nodeData.getNodeAgentTypes(), MediaType.APPLICATION_JSON));
 		}
 
 		target = client
-				.target("http://" + node.getAddress() + "/agent-center-dc/rest/agent-center/agents/running-agents");
+				.target("http://" + node.getAddress() + "/agent-center-dc/rest/agent-center/agent/running-agents");
 		try {
-			target.request().post(Entity.entity(NodeData.getRunningAgents(), MediaType.APPLICATION_JSON));
+			target.request().post(Entity.entity(nodeData.getRunningAgents(), MediaType.APPLICATION_JSON));
 		} catch (Exception e) {
 			e.printStackTrace();
-			target.request().post(Entity.entity(NodeData.getRunningAgents(), MediaType.APPLICATION_JSON));
+			target.request().post(Entity.entity(nodeData.getRunningAgents(), MediaType.APPLICATION_JSON));
 		}
 	}
 
@@ -124,8 +136,8 @@ public class RestEndpointService {
 
 		ResteasyClient client = new ResteasyClientBuilder().build();
 
-		NodeData.removeNode(node.getAddress());
-		for (AgentCenter n : NodeData.getNodes()) {
+		nodeData.removeNode(node);
+		for (AgentCenter n : nodeData.getNodes()) {
 			if (n.getAddress().equals(node.getAddress())) {
 				continue;
 			}
@@ -136,38 +148,20 @@ public class RestEndpointService {
 
 	}
 
-	public Integer createAgent(String type, String name) {
-		for(Agent agent : NodeData.getRunningAgents())
-		{
-			if(agent.getId().getName().equals(name)) {
-				return ErrorResponse.AGENT_NAME_ALREADY_EXISTS;
+	public void removeNode(String nodeAddress) {
+
+		for (AgentCenter n : nodeData.getNodes()) {
+			if (n.getAddress().equals(nodeAddress)) {
+				nodeData.removeNode(n);
+				break;
 			}
 		}
-		
-		ResteasyClient client = new ResteasyClientBuilder().build();
-		
-		try {
-			Agent agent = (Agent) Class.forName("agents." + type).newInstance();
-			agent.setId(new AID(name, new AgentCenter(System.getProperty(Util.THIS_NODE)), new AgentType(type)));
-			NodeData.addRunningAgent(agent);
-			if(System.getProperty(Util.MASTER_NODE) != null) {
-				ResteasyWebTarget target = client
-						.target("http://" + System.getProperty(Util.MASTER_NODE) + "/agent-center-dc/rest/agent-center/agents/running-agent");
-				target.request().post(Entity.entity(agent, MediaType.APPLICATION_JSON));
-			}
-			
-			for (AgentCenter n : NodeData.getNodes()) {
-				if (n.getAddress().equals(System.getProperty(Util.THIS_NODE))) {
-					continue;
-				}
-				ResteasyWebTarget target = client
-						.target("http://" + n.getAddress() + "/agent-center-dc/rest/agent-center/agents/running-agent");
-				target.request().post(Entity.entity(agent, MediaType.APPLICATION_JSON));
-			}
-		}
-		catch(Exception e) {
-		}
-		
-		return ErrorResponse.ERRORFREE;
+
+		nodeData.removeNodeAgentTypes(nodeAddress);
+
+		nodeData.setRunningAgents(nodeData.getRunningAgents().stream()
+				.filter(runningAgent -> !runningAgent.getId().getHost().getAddress().equals(nodeAddress))
+				.collect(Collectors.toList()));
 	}
+
 }

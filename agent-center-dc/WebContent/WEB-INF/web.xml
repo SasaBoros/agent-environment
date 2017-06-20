@@ -6,7 +6,7 @@
   </welcome-file-list>
   <context-param>
 		<param-name>resteasy.servlet.mapping.prefix</param-name>
-		<param-value>/rest</param-value>
+		<param-value>/rest/agent-center</param-value>
 	</context-param>
 	<servlet>
 		<servlet-name>JAX-RS_Servlet</servlet-name>
@@ -14,7 +14,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>JAX-RS_Servlet</servlet-name>
-		<url-pattern>/rest/*</url-pattern>
+		<url-pattern>/rest/agent-center/*</url-pattern>
 	</servlet-mapping>
 	<context-param>
 		<param-name>resteasy.scan</param-name>

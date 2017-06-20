@@ -3,7 +3,7 @@ rsMessagingModule.service('rsResourceService', ['$http', function($http) {
 	this.getPerformatives = function() {
 		return $http({
 			  method: 'GET',
-			  url: '../agent-center-dc/rest/agent-center/agents/performatives'
+			  url: '../agent-center-dc/rest/agent-center/message/performatives'
 			}).then(function successCallback(response) {
 				return response;
 			  }, function errorCallback(response) {
@@ -14,7 +14,7 @@ rsMessagingModule.service('rsResourceService', ['$http', function($http) {
 	this.getAgentTypes = function() {
 		return $http({
 			  method: 'GET',
-			  url: '../agent-center-dc/rest/agent-center/agents/types'
+			  url: '../agent-center-dc/rest/agent-center/agent-type/agent-types'
 			}).then(function successCallback(response) {
 				return response;
 			  }, function errorCallback(response) {
@@ -25,7 +25,7 @@ rsMessagingModule.service('rsResourceService', ['$http', function($http) {
 	this.getRunningAgents = function() {
 		return $http({
 			  method: 'GET',
-			  url: '../agent-center-dc/rest/agent-center/agents/running-agents'
+			  url: '../agent-center-dc/rest/agent-center/agent/running-agents'
 			}).then(function successCallback(response) {
 				return response;
 			  }, function errorCallback(response) {
@@ -47,7 +47,7 @@ rsMessagingModule.service('rsMessageService', ['$http', function($http) {
 		var self = this;
 		$http({
 			  method: 'POST',
-			  url: '../agent-center-dc/rest/agent-center/message',
+			  url: '../agent-center-dc/rest/agent-center/message/send',
 			  data: message
 			}).then(function successCallback(response) {
 				 self.handleErrorResponse(response.data)
@@ -76,7 +76,7 @@ rsMessagingModule.service('rsAgentService', ['$http', function($http) {
 		var self = this;
 		$http({
 			  method: 'PUT',
-			  url: '../agent-center-dc/rest/agent-center/agents/agent/start/' + agent.type + "/" + agent.name
+			  url: '../agent-center-dc/rest/agent-center/agent/start/' + agent.type + "/" + agent.name
 			}).then(function successCallback(response) {
 				 self.handleErrorResponse(response.data);
 				 agent.name = "";
@@ -94,7 +94,7 @@ rsMessagingModule.service('rsAgentService', ['$http', function($http) {
 		}
 		$http({
 			  method: 'DELETE',
-			  url: '../agent-center-dc/rest/agent-center/agents/agent/stop/' + agentName
+			  url: '../agent-center-dc/rest/agent-center/agent/stop/' + agentName
 			}).then(function successCallback(response) {
 				
 			  }, function errorCallback(response) {

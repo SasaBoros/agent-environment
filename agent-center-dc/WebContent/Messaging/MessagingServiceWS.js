@@ -25,6 +25,14 @@ messagingModuleWS.service('wsMessageService', function() {
 		else if(messageType == 'STARTED_AGENT') {
 			data.runningAgents.push(content);
 		}
+		else if(messageType == 'DELETED_AGENT') {
+			for(var i = 0; i < data.runningAgents.length; i++) {
+				if(runningAgents[i].id.name == content) {
+					data.runningAgents.splice(i, 1);
+					return;
+				}
+			}
+		}
 		else if(messageType == 'ERROR') {
 			toastr.error(content);
 		}
@@ -47,7 +55,7 @@ messagingModuleWS.service('wsMessageService', function() {
 	}
 	
 	this.startAgent = function(socket, agent) {
-		this.sendWSMessage(socket, 'START_AGENT', agent.name + "/" + agent.type);
+		this.sendWSMessage(socket, 'START_AGENT', agent.type + "/" + agent.name);
 		agent.name = "";
 	}
 	
