@@ -39,5 +39,6 @@ public class WSEndpoint {
 
 	@OnError
 	public void handleError(Session session, Throwable t) {
+		
 	}
 }

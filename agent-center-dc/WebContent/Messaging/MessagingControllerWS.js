@@ -1,6 +1,6 @@
 var messagingModuleWS = angular.module('wsMessagingModule', []);
 
-messagingModuleWS.controller('wsMessageController', ['$scope', 'wsMessageService', function($scope, wsMessageService) {
+messagingModuleWS.controller('wsMessageController', ['$scope', '$location' , 'wsMessageService', function($scope, $location, wsMessageService) {
 	
 	$scope.$parent.protocol = 'ws';
 	
@@ -24,7 +24,7 @@ messagingModuleWS.controller('wsMessageController', ['$scope', 'wsMessageService
 	
 	$scope.agent = {type : "", name: ""};
 	
-	$scope.socket = new WebSocket('ws://localhost:8080/agent-center-dc/agent-center');
+	$scope.socket = new WebSocket('ws://' + $location.host() + ':' + $location.port() + '/agent-center-dc/agent-center');
 	
 	$scope.socket.onopen = function(message) {
 	 		console.log('Connection opened');
@@ -52,7 +52,7 @@ messagingModuleWS.controller('wsMessageController', ['$scope', 'wsMessageService
 	}
 	
 	$scope.stopAgent = function(agentName) {
-		wsMessageService.stopAgent($scope.socket, $scope.data, agentName);
+		wsMessageService.stopAgent($scope.socket, agentName);
 	}
 	
 }]);

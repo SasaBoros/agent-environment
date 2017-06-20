@@ -12,6 +12,7 @@ messagingModuleWS.service('wsMessageService', function() {
 			data.agentTypes = content;
 		}
 		else if(messageType == 'RUNNING_AGENTS') {
+			console.log(content)
 			for(var i = 0; i < content.length;i++) {
 				for(var j = 0; j < data.runningAgents.length; j++) {
 					if(content[i].id.name == data.runningAgents[j].id.name) {
@@ -27,7 +28,7 @@ messagingModuleWS.service('wsMessageService', function() {
 		}
 		else if(messageType == 'DELETED_AGENT') {
 			for(var i = 0; i < data.runningAgents.length; i++) {
-				if(runningAgents[i].id.name == content) {
+				if(data.runningAgents[i].id.name == content) {
 					data.runningAgents.splice(i, 1);
 					return;
 				}
@@ -36,10 +37,13 @@ messagingModuleWS.service('wsMessageService', function() {
 		else if(messageType == 'ERROR') {
 			toastr.error(content);
 		}
+		else if(messageType == 'ERROR_FREE') {
+			toastr.info(content);
+		}
 	}
 	
 	this.sendWSMessage = function(socket, type, content) {
-		var wsMessage = {'messageType' : type, 'content' : angular.toJson(content)};
+		var wsMessage = {'messageType' : type, 'content' : content};
 		socket.send(angular.toJson(wsMessage));
 	}
 	
@@ -59,13 +63,8 @@ messagingModuleWS.service('wsMessageService', function() {
 		agent.name = "";
 	}
 	
-	this.stopAgent = function(socket, data, agentName) {
+	this.stopAgent = function(socket, agentName) {
 		this.sendWSMessage(socket, 'STOP_AGENT', agentName);
-		for(var i = 0;i < data.runningAgents.length; i++) {
-			if(data.runningAgents[i].id.name == agentName) {
-				data.runningAgents.splice(i, 1);
-				break;
-			}
-		}
+		
 	}
 });

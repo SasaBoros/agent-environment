@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
@@ -35,8 +36,6 @@ public class NodeCore {
 	void init() {
 		loadAgentTypes();
 		
-		nodeData.getNodeAgentTypes().remove(null);
-
 		if (System.getProperty(Util.MASTER_NODE) != null) {
 
 			ResteasyClient client = new ResteasyClientBuilder().build();
@@ -81,6 +80,23 @@ public class NodeCore {
 					e.printStackTrace();
 				}
 			}
+		}
+	}
+	
+	@PreDestroy
+	void cleanNodeData() {
+		ResteasyClient client = new ResteasyClientBuilder().build();
+		
+		if(System.getProperty(Util.MASTER_NODE) != null) {
+			ResteasyWebTarget target = client.target("http://" + System.getProperty(Util.MASTER_NODE)
+			+ "/agent-center-dc/rest/agent-center/node/unregister/" + System.getProperty(Util.THIS_NODE));
+			target.request().delete();
+		}
+		
+		for (AgentCenter n : nodeData.getNodes()) {
+			ResteasyWebTarget target = client.target("http://" + n.getAddress()
+					+ "/agent-center-dc/rest/agent-center/node/unregister/" + System.getProperty(Util.THIS_NODE));
+			target.request().delete();
 		}
 	}
 	

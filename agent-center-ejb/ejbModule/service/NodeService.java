@@ -121,7 +121,7 @@ public class NodeService {
 			e.printStackTrace();
 			target.request().post(Entity.entity(nodeData.getNodeAgentTypes(), MediaType.APPLICATION_JSON));
 		}
-
+		
 		target = client
 				.target("http://" + node.getAddress() + "/agent-center-dc/rest/agent-center/agent/running-agents");
 		try {
@@ -158,7 +158,7 @@ public class NodeService {
 		}
 
 		nodeData.removeNodeAgentTypes(nodeAddress);
-
+		
 		nodeData.setRunningAgents(nodeData.getRunningAgents().stream()
 				.filter(runningAgent -> !runningAgent.getId().getHost().getAddress().equals(nodeAddress))
 				.collect(Collectors.toList()));

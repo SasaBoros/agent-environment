@@ -1,1 +1,1 @@
--Dagent-types-path="C:\Users\Sasa.BOROS\Desktop\Ucenje\AT-GIT\agent-environment\agent-type-files\agent-types-1.txt"
+-Dagent-types-path="C:\Users\Sasa.BOROS\Desktop\Ucenje\AT-GIT\agent-environment\agent-type-files\agent-types-1.txt" -Dthis-node="127.0.0.1:8080"
