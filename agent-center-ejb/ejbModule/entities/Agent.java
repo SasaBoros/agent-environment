@@ -28,6 +28,6 @@ public abstract class Agent implements Serializable {
 		this.id = id;
 	}
 
-	public abstract void handleMessage(Message mesage);
+	public abstract void handleMessage(Message message);
 
 }

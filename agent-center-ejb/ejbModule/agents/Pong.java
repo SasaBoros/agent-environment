@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import entities.AID;
 import entities.Agent;
 import entities.Message;
+import utilities.Util;
 
 public class Pong extends Agent {
 
@@ -21,7 +22,7 @@ public class Pong extends Agent {
 	
 	@Override
 	public void handleMessage(Message message) {
-		
+		System.out.println("JA SAM PONG AGENT NA HOSTU: " + System.getProperty(Util.THIS_NODE));
 	}
 
 }

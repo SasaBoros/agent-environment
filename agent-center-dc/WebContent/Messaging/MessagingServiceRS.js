@@ -43,7 +43,6 @@ rsMessagingModule.service('rsMessageService', ['$http', function($http) {
 			toastr.warning("All fields are required.");
 			return;
 		}
-		
 		var self = this;
 		$http({
 			  method: 'POST',
@@ -72,7 +71,17 @@ rsMessagingModule.service('rsMessageService', ['$http', function($http) {
 }]);
 
 rsMessagingModule.service('rsAgentService', ['$http', function($http) { 
-	this.startAgent = function(agent) {
+	this.startAgent = function(agent, runningAgents) {
+		for(var i = 0; i < runningAgents.length; i++) {
+			if(runningAgents[i].id.name == agent.name) {
+				toastr.error("Agent with choosen name already exists.");
+				agent.name = "";
+				return;
+			}
+		}
+		
+		runningAgents.push({id : {name : agent.name}})
+		
 		var self = this;
 		$http({
 			  method: 'PUT',
@@ -105,8 +114,14 @@ rsMessagingModule.service('rsAgentService', ['$http', function($http) {
 	this.handleErrorResponse = function(error) {
 		if(error == 4) {
 			toastr.error("Agent with that name is already started.");
-		}	
-		else {
+		}
+		else if(error == 5) {
+			toastr.error("Choosen agent type doesn't exist anymore.");
+		}
+		else if(error == 6) {
+			toastr.error("Agent failed to start.");
+		}
+		else if(error == 0){
 			toastr.info("Agent successfuly started.");
 		}
 	}

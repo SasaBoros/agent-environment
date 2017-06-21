@@ -37,8 +37,19 @@ public class AgentService {
 	public void addRunningAgent(Agent runningAgent) {
 		nodeData.addRunningAgent(runningAgent);
 	}
+	
+	public Agent delegatedStartAgent(String type, String name) {
+		try {
+			Agent agent = (Agent) Class.forName("agents." + type).newInstance();
+			agent.setId(new AID(name, new AgentCenter(System.getProperty(Util.THIS_NODE)), new AgentType(type)));
+			return agent;
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
-	public Integer startAgent(String type, String name, String sourceAddress) {
+	public Integer startAgent(String type, String name) {
 
 		ResteasyClient client = new ResteasyClientBuilder().build();
 
@@ -48,10 +59,10 @@ public class AgentService {
 			}
 		}
 
-		if (!isTypeAvailable(type, nodeData.getThisNodeAgentTypes())) {
+		if (!Util.isAgentTypeAvailable(type, nodeData.getThisNodeAgentTypes())) {
 			for (Map.Entry<String, List<AgentType>> entry : nodeData.getNodeAgentTypes().entrySet()) {
 				if (!entry.getKey().equals(System.getProperty(Util.THIS_NODE))
-						&& isTypeAvailable(type, entry.getValue())) {
+						&& Util.isAgentTypeAvailable(type, entry.getValue())) {
 					ResteasyWebTarget target = client.target("http://" + entry.getKey()
 							+ "/agent-center-dc/rest/agent-center/agent/delegate-start/" + type + "/" + name);
 					try {
@@ -99,15 +110,6 @@ public class AgentService {
 		} catch (Exception e) {
 
 		}
-	}
-
-	private boolean isTypeAvailable(String type, List<AgentType> types) {
-		for (AgentType at : types) {
-			if (at.getName().equals(type)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	public void stopAgent(String agentName) {

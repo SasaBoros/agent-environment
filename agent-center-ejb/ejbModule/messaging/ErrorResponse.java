@@ -14,5 +14,8 @@ public final class ErrorResponse {
 	public static final String AGENT_TYPE_DOESNT_EXISTS_ERROR_TEXT = "Choosen agent type doesn't exist";
 	public static final String AGENT_SUCCESFULLY_STARTED_TEXT = "Agent succesfully started.";
 	public static final String AGENT_FAILED_TO_START_TEXT = "Agent failed to start because of unknown reason.";
+	public static final Object MESSAGE_FORMAT_ERROR_TEXT = "Message format error.";
+	public static final String MESSAGE_CONSUMED_TEXT = "Message succesfully consumed.";
+	public static final Object RECEIVERS_AGENT_TERMINATED_TEXT = "One or more agent receivers have terminated.";
 
 }

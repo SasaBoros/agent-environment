@@ -9,7 +9,7 @@ import entities.AgentCenter;
 @Remote
 public interface NodeEndpointRemote {
 	
-	List<AgentCenter> getNodes();
+	void getNodes();
 
 	void setNodes(List<AgentCenter> nodes);
 	

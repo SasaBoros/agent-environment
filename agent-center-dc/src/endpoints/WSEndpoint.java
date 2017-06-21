@@ -27,8 +27,8 @@ public class WSEndpoint {
 	}
 
 	@OnMessage
-	public void handleMessage(Session session, String message) {
-		wsService.handleMessage(session, message);
+	public void handleWSMessage(Session session, String message) {
+		wsService.handleWSMessage(session, message);
 	}
 
 	@OnClose

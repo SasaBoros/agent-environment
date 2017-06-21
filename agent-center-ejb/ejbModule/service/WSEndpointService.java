@@ -6,6 +6,15 @@ import java.util.Map;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.QueueSession;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.websocket.Session;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
@@ -65,7 +74,7 @@ public class WSEndpointService {
 		}
 	}
 
-	public void handleMessage(Session clientSession, String message) {
+	public void handleWSMessage(Session clientSession, String message) {
 		ObjectMapper mapper = new ObjectMapper();
 		WSMessage wsMessage = null;
 		try {
@@ -84,15 +93,84 @@ public class WSEndpointService {
 		} else if (wsMessage.getMessageType().equals(WSMessageType.STOP_AGENT)) {
 			stopAgent(clientSession, wsMessage.getContent());
 		} else if (wsMessage.getMessageType().equals(WSMessageType.MESSAGE)) {
-
-			System.out.println(wsMessage.getContent());
 			try {
 				Message m = mapper.readValue(wsMessage.getContent(), Message.class);
-				System.out.println(m);
+				handleMessage(clientSession, m);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				try {
+					sendWSMessage(clientSession, WSMessageType.ERROR,
+							mapper.writeValueAsString(ErrorResponse.MESSAGE_FORMAT_ERROR_TEXT));
+				} catch (JsonProcessingException e1) {
+					e1.printStackTrace();
+				}
+			} catch(Exception e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	private void handleMessage(Session clientSession, Message message) throws Exception {
+		ObjectMapper mapper = new ObjectMapper();
+		
+		for (AID id : message.getReceivers()) {
+			for (Agent agent : nodeData.getRunningAgents()) {
+				if (agent.getId().getName().equals(id.getName())) {
+					if (agent.getId().getHost().getAddress().equals(System.getProperty(Util.THIS_NODE))) {
+						employAgent(message, agent.getId().getName());
+					} else {
+						try {
+							delegateToRecieverAgentNode(message, agent.getId());
+						} catch (Exception e) {
+							sendWSMessage(clientSession, WSMessageType.ERROR,
+									mapper.writeValueAsString(ErrorResponse.RECEIVERS_AGENT_TERMINATED_TEXT));
+							return;
+						}
+					}
+				}
+			}
+		}
+		sendWSMessage(clientSession, WSMessageType.ERROR_FREE,
+				mapper.writeValueAsString(ErrorResponse.MESSAGE_CONSUMED_TEXT));
+	}
+
+	private void delegateToRecieverAgentNode(Message message, AID id) {
+
+		ResteasyClient client = new ResteasyClientBuilder().build();
+
+		ResteasyWebTarget target = client.target("http://" + id.getHost().getAddress()
+				+ "/agent-center-dc/rest/agent-center/message/employ-agent/" + id.getName());
+		target.request().post(Entity.entity(message, MediaType.APPLICATION_JSON));
+	}
+
+	public void employAgent(Message message, String agentName) {
+		try {
+			Context context = new InitialContext();
+			ConnectionFactory connectionFactory = (ConnectionFactory) context.lookup("ConnectionFactory");
+			Connection connection = connectionFactory.createConnection();
+			javax.jms.Session session = connection.createSession(false, QueueSession.AUTO_ACKNOWLEDGE);
+			Queue queue = (Queue) context.lookup("jms/queue/message-queue");
+			connection.start();
+			MessageProducer producer = session.createProducer(queue);
+			
+			ObjectMapper mapper = new ObjectMapper();
+			String jsonInString = null;
+			try {
+				jsonInString = mapper.writeValueAsString(message);
+				javax.jms.Message m = session.createTextMessage(jsonInString);
+				m.setStringProperty("agentName", agentName);
+				producer.send(m);
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+			}
+
+			connection.stop();
+			connection.close();
+			session.close();
+		} catch (JMSException e) {
+			e.printStackTrace();
+		} catch (NamingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -115,10 +193,10 @@ public class WSEndpointService {
 			}
 		}
 
-		if (!isTypeAvailable(type, nodeData.getThisNodeAgentTypes())) {
+		if (!Util.isAgentTypeAvailable(type, nodeData.getThisNodeAgentTypes())) {
 			for (Map.Entry<String, List<AgentType>> entry : nodeData.getNodeAgentTypes().entrySet()) {
 				if (!entry.getKey().equals(System.getProperty(Util.THIS_NODE))
-						&& isTypeAvailable(type, entry.getValue())) {
+						&& Util.isAgentTypeAvailable(type, entry.getValue())) {
 					ResteasyWebTarget target = client.target("http://" + entry.getKey()
 							+ "/agent-center-dc/rest/agent-center/agent/delegate-start/" + type + "/" + name);
 					try {
@@ -185,15 +263,6 @@ public class WSEndpointService {
 		} catch (Exception e) {
 
 		}
-	}
-
-	private boolean isTypeAvailable(String type, List<AgentType> types) {
-		for (AgentType at : types) {
-			if (at.getName().equals(type)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private void stopAgent(Session clientSession, String agentName) {

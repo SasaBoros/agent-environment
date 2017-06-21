@@ -3,7 +3,6 @@ package endpoints;
 import java.util.List;
 
 import javax.ejb.Remote;
-import javax.servlet.http.HttpServletRequest;
 
 import entities.Agent;
 
@@ -12,7 +11,9 @@ public interface AgentEndpointRemote {
 
 	List<Agent> getRunningAgents();
 
-	Integer startAgent(String type, String name, HttpServletRequest request);
+	Integer startAgent(String type, String name);
+	
+	Agent delegateStartAgent(String type, String name);
 
 	void stopAgent(String aid);
 	

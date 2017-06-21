@@ -11,4 +11,6 @@ public interface MessageEndpointRemote {
 	Performative[] getPerformatives();
 
 	Integer sendMessage(Message message);
+
+	void employAgent(String agentName, Message message);
 }

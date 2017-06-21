@@ -55,7 +55,7 @@ messagingModuleWS.service('wsMessageService', function() {
 			return;
 		}
 		
-		this.sendWSMessage(socket, 'MESSAGE', message);
+		this.sendWSMessage(socket, 'MESSAGE', angular.toJson(message));
 	}
 	
 	this.startAgent = function(socket, agent) {

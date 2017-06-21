@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -13,7 +12,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import entities.Agent;
@@ -61,9 +59,16 @@ public class AgentEndpoint implements AgentEndpointRemote {
 	@Path("/start/{type}/{name}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Override
-	public Integer startAgent(@PathParam("type") String type, @PathParam("name") String name, @Context HttpServletRequest request) {
-		System.out.println(request.getRemoteHost() + ":" + request.getRemotePort());
-		return agentService.startAgent(type, name, request.getRemoteHost() + ":" + request.getRemotePort());
+	public Integer startAgent(@PathParam("type") String type, @PathParam("name") String name) {
+		return agentService.startAgent(type, name);
+	}
+	
+	@PUT
+	@Path("/delegate-start/{type}/{name}")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Override
+	public Agent delegateStartAgent(@PathParam("type") String type, @PathParam("name") String name) {
+		return agentService.delegatedStartAgent(type, name);
 	}
 
 	@DELETE

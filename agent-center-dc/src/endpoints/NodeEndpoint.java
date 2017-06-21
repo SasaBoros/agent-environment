@@ -25,10 +25,10 @@ public class NodeEndpoint implements NodeEndpointRemote {
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/nodes")
+	@Path("/node")
 	@Override
-	public List<AgentCenter> getNodes() {
-		return nodeService.getNodes();
+	public void getNodes() {
+		
 	}
 	
 	@POST

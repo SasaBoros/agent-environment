@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import entities.AID;
 import entities.Agent;
 import entities.Message;
+import utilities.Util;
 
 public class MapReduce extends Agent {
 
@@ -21,7 +22,7 @@ public class MapReduce extends Agent {
 	
 	@Override
 	public void handleMessage(Message message) {
-		
+		System.out.println("JA SAM MAPREDUCE AGENT NA HOSTU: " + System.getProperty(Util.THIS_NODE));
 	}
 
 }
