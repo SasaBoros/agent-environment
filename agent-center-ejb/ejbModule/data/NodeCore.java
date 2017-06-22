@@ -102,7 +102,7 @@ public class NodeCore {
 		}
 	}
 	
-	@Schedule(hour = "*", minute = "*", second = "*/10", info = "every tenth")
+	@Schedule(hour = "*", minute = "*", second = "*/30", info = "every 30eth")
 	public void timer() {
 		ResteasyClient client = new ResteasyClientBuilder().build();
 		List<AgentCenter> nodesToRemove = new ArrayList<AgentCenter>();

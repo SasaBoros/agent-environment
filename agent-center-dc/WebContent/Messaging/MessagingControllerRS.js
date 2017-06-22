@@ -28,7 +28,6 @@ rsMessagingModule.controller('rsMessageController', [ '$scope', '$interval', '$w
 					replyBy : null
 				};
 			
-			
 			var getPerformatives = function() {
 				rsResourceService.getPerformatives().then(function(response) {
 					if(response.status == -1)
@@ -47,17 +46,21 @@ rsMessagingModule.controller('rsMessageController', [ '$scope', '$interval', '$w
 			
 			var getRunningAgents = function() {
 				rsResourceService.getRunningAgents().then(function(response) {
+					
+					
+					var agents = angular.fromJson(response.data);
+					
 					if(response.status == -1)
 						$interval.cancel($scope.runningAgentsInterval);
-					for(var i = 0; i < response.data.length;i++) {
+					for(var i = 0; i < agents.length;i++) {
 						for(var j = 0; j < $scope.data.runningAgents.length; j++) {
-							if(response.data[i].id.name == $scope.data.runningAgents[j].id.name) {
-								response.data[i] = $scope.data.runningAgents[j];
+							if(agents[i].id.name == $scope.data.runningAgents[j].id.name) {
+								agents[i] = $scope.data.runningAgents[j];
 							}
 							
 						}
 					}
-					$scope.data.runningAgents = response.data;
+					$scope.data.runningAgents = agents;
 				});
 			}
 			
@@ -75,12 +78,12 @@ rsMessagingModule.controller('rsMessageController', [ '$scope', '$interval', '$w
 			}
 			
 			$scope.startAgent = function() {
-				rsAgentService.startAgent($scope.agent, $scope.data.runningAgents);
-			}
+				rsAgentService.startAgent($scope.agent, $scope.data.runningAgents).then(function(response) {
+				getRunningAgents();
+			})};
 			
 			$scope.stopAgent = function(agentName) {
 				rsAgentService.stopAgent($scope.data.runningAgents, agentName);
-				
 			}
 			
 			$scope.$on('$destroy',function(){

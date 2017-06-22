@@ -2,6 +2,9 @@ package entities;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class AgentType implements Serializable {
 
 	private static final long serialVersionUID = -1431717179567069604L;
@@ -15,8 +18,9 @@ public class AgentType implements Serializable {
 	public AgentType(String name) {
 		this.name = name;
 	}
-
-	public AgentType(String name, String module) {
+	
+	@JsonCreator
+	public AgentType(@JsonProperty("name") String name, @JsonProperty("module") String module) {
 		this.name = name;
 		this.module = module;
 	}
@@ -47,6 +51,11 @@ public class AgentType implements Serializable {
 				return false;
 		}
 		return super.equals(obj);
+	}
+	
+	@Override
+	public String toString() {
+		return "AgentType name: " + name + ", module: " + module;
 	}
 
 }

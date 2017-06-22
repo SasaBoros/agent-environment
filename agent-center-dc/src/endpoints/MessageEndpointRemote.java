@@ -12,5 +12,4 @@ public interface MessageEndpointRemote {
 
 	Integer sendMessage(Message message);
 
-	void employAgent(String agentName, Message message);
 }

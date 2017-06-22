@@ -2,6 +2,9 @@ package entities;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class AID implements Serializable {
 
 	private static final long serialVersionUID = 7310701926118376290L;
@@ -13,16 +16,9 @@ public class AID implements Serializable {
 	public AID() {
 	}
 	
-	public AID(String name) {
-		this.name = name;
-	}
 	
-	public AID(String name, AgentType type) {
-		this.name = name;
-		this.type = type;
-	}
-
-	public AID(String name, AgentCenter host, AgentType type) {
+	@JsonCreator
+	public AID(@JsonProperty("name") String name, @JsonProperty("host") AgentCenter host, @JsonProperty("type") AgentType type) {
 		this.name = name;
 		this.host = host;
 		this.type = type;
@@ -50,6 +46,11 @@ public class AID implements Serializable {
 
 	public void setType(AgentType type) {
 		this.type = type;
+	}
+	
+	@Override
+	public String toString() {
+		return "AID name: " + name + ", " + host + ", " + type;
 	}
 
 }

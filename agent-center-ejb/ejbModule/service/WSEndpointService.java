@@ -84,7 +84,6 @@ public class WSEndpointService {
 		}
 
 		if (wsMessage == null) {
-			System.out.println("AAA");
 			return;
 		}
 

@@ -11,18 +11,19 @@ import utilities.Util;
 public class MapReduce extends Agent {
 
 	private static final long serialVersionUID = -976246058042772369L;
-	
+
 	public MapReduce() {
 	}
-	
+
 	@JsonCreator
-    public MapReduce(@JsonProperty("id") AID id) {
-	 this.id = id;
-    }
-	
+	public MapReduce(@JsonProperty("id") AID id) {
+		this.id = id;
+	}
+
 	@Override
 	public void handleMessage(Message message) {
-		System.out.println("JA SAM MAPREDUCE AGENT NA HOSTU: " + System.getProperty(Util.THIS_NODE));
+		System.out.println("MapReduce agent with name: '" + id.getName() + "' on host: '"
+				+ System.getProperty(Util.THIS_NODE) + "' received message: " + message);
 	}
 
 }

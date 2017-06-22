@@ -2,6 +2,8 @@ package utilities;
 
 import java.util.List;
 
+import entities.AID;
+import entities.Agent;
 import entities.AgentType;
 
 public final class Util {
@@ -20,5 +22,12 @@ public final class Util {
 		return false;
 	}
 	
-	
+	public static Agent getAgentById(AID id, List<Agent> agents) {
+		for(Agent agent : agents) {
+			if(agent.getId().getName().equals(id.getName())) {
+				return agent;
+			}
+		}
+		return null;
+	}
 }

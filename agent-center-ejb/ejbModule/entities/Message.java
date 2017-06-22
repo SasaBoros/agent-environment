@@ -1,7 +1,11 @@
 package entities;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Message implements Serializable {
 
@@ -9,7 +13,7 @@ public class Message implements Serializable {
 
 	private Performative performative;
 	private AID sender;
-	private AID[] receivers;
+	private List<AID> receivers;
 	private AID replyTo;
 	private String content;
 	private Object contentObj;
@@ -22,15 +26,14 @@ public class Message implements Serializable {
 	private String replyWith;
 	private String inReplyTo;
 	private Long replyBy;
-	
+
 	public Message() {
 	}
-
 	
-	public Message(Performative performative, AID sender, AID[] receivers, AID replyTo, String content, String language,
-			String encoding, String ontology, String protocol, String conversationId, String replyWith,
-			String inReplyTo, Long replyBy) {
-		super();
+	@JsonCreator
+	public Message(@JsonProperty("performative")Performative performative, @JsonProperty("sender")AID sender, @JsonProperty("receivers")List<AID> receivers, @JsonProperty("replyTo")AID replyTo, @JsonProperty("content")String content,
+			@JsonProperty("language")String language, @JsonProperty("encoding")String encoding, @JsonProperty("ontology")String ontology, @JsonProperty("protocol")String protocol, @JsonProperty("conversationId")String conversationId, @JsonProperty("replyWith")String replyWith,
+			@JsonProperty("inReplyTo")String inReplyTo, @JsonProperty("replyBy")Long replyBy) {
 		this.performative = performative;
 		this.sender = sender;
 		this.receivers = receivers;
@@ -45,8 +48,6 @@ public class Message implements Serializable {
 		this.inReplyTo = inReplyTo;
 		this.replyBy = replyBy;
 	}
-
-
 
 	public Performative getPerformative() {
 		return performative;
@@ -64,11 +65,11 @@ public class Message implements Serializable {
 		this.sender = sender;
 	}
 
-	public AID[] getReceivers() {
+	public List<AID> getReceivers() {
 		return receivers;
 	}
 
-	public void setReceivers(AID[] receivers) {
+	public void setReceivers(List<AID> receivers) {
 		this.receivers = receivers;
 	}
 
@@ -167,15 +168,21 @@ public class Message implements Serializable {
 	public void setReplyBy(Long replyBy) {
 		this.replyBy = replyBy;
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder message = new StringBuilder();
-		message.append("Message from: " + sender.getName() + ", to: ");
-		for(AID reciever : receivers) {
-			message.append(reciever.getName() + ", ");
+		message.append("Message { performative: " + performative + ", sender: " + ((sender == null) ? "" : sender.getName()) + ", receivers: ");
+		if(receivers != null) {
+			for (AID reciever : receivers) {
+				message.append(reciever.getName() + ", ");
+			}
 		}
-		message.append("with performative: " + performative + ", and content: " + content);
+			
+		message.append("replyTo: " + ((replyTo == null) ? "" : replyTo.getName()) + ", content: " + content + ", language: " + language
+				+ ", encoding: " + encoding + ", ontology: " + ontology + ", protocol: " + protocol
+				+ ", conversationId: " + conversationId + ", replyWith: " + replyWith + ", inReplyTo: " + inReplyTo
+				+ ", replyBy: " + replyBy + " }");
 		return message.toString();
 	}
 

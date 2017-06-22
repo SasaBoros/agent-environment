@@ -59,6 +59,10 @@ messagingModuleWS.service('wsMessageService', function() {
 	}
 	
 	this.startAgent = function(socket, agent) {
+		if(agent.name == null || agent.name == "") {
+			toastr.warning("Agent name must be choosen.");
+			return;
+		}
 		this.sendWSMessage(socket, 'START_AGENT', agent.type + "/" + agent.name);
 		agent.name = "";
 	}

@@ -47,7 +47,7 @@ rsMessagingModule.service('rsMessageService', ['$http', function($http) {
 		$http({
 			  method: 'POST',
 			  url: '../agent-center-dc/rest/agent-center/message/send',
-			  data: message
+			  data: angular.toJson(message)
 			}).then(function successCallback(response) {
 				 self.handleErrorResponse(response.data)
 			  }, function errorCallback(response) {
@@ -72,6 +72,11 @@ rsMessagingModule.service('rsMessageService', ['$http', function($http) {
 
 rsMessagingModule.service('rsAgentService', ['$http', function($http) { 
 	this.startAgent = function(agent, runningAgents) {
+		if(agent.name == null || agent.name == "") {
+			toastr.warning("Agent name must be choosen.");
+			return;
+		}
+		
 		for(var i = 0; i < runningAgents.length; i++) {
 			if(runningAgents[i].id.name == agent.name) {
 				toastr.error("Agent with choosen name already exists.");
@@ -80,15 +85,14 @@ rsMessagingModule.service('rsAgentService', ['$http', function($http) {
 			}
 		}
 		
-		runningAgents.push({id : {name : agent.name}})
-		
 		var self = this;
-		$http({
+		return $http({
 			  method: 'PUT',
 			  url: '../agent-center-dc/rest/agent-center/agent/start/' + agent.type + "/" + agent.name
 			}).then(function successCallback(response) {
 				 self.handleErrorResponse(response.data);
 				 agent.name = "";
+				 return response;
 			  }, function errorCallback(response) {
 				  
 			  });

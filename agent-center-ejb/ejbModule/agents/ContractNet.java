@@ -8,21 +8,21 @@ import entities.Agent;
 import entities.Message;
 import utilities.Util;
 
-public class Ping extends Agent {
+public class ContractNet extends Agent {
+	
+	private static final long serialVersionUID = 5816729639833406085L;
 
-	private static final long serialVersionUID = -3168432547521573115L;
-
-	public Ping() {
+	public ContractNet() {
 	}
 	
 	@JsonCreator
-    public Ping(@JsonProperty("id") AID id) {
+    public ContractNet(@JsonProperty("id") AID id) {
 	 this.id = id;
     }
-
+		
 	@Override
 	public void handleMessage(Message message) {
-		System.out.println("Ping agent with name: '" + id.getName() + "' on host: '"
+		System.out.println("ContractNet agent with name: '" + id.getName() + "' on host: '"
 				+ System.getProperty(Util.THIS_NODE) + "' received message: " + message);
 	}
 
