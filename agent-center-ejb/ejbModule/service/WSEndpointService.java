@@ -1,6 +1,7 @@
 package service;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -102,43 +103,52 @@ public class WSEndpointService {
 				} catch (JsonProcessingException e1) {
 					e1.printStackTrace();
 				}
-			} catch(Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	private void handleMessage(Session clientSession, Message message) throws Exception {
+	public void handleMessage(Session clientSession, Message message) {
 		ObjectMapper mapper = new ObjectMapper();
-		
+
 		for (AID id : message.getReceivers()) {
-			for (Agent agent : nodeData.getRunningAgents()) {
-				if (agent.getId().getName().equals(id.getName())) {
-					if (agent.getId().getHost().getAddress().equals(System.getProperty(Util.THIS_NODE))) {
-						employAgent(message, agent.getId().getName());
-					} else {
-						try {
-							delegateToRecieverAgentNode(message, agent.getId());
-						} catch (Exception e) {
-							sendWSMessage(clientSession, WSMessageType.ERROR,
-									mapper.writeValueAsString(ErrorResponse.RECEIVERS_AGENT_TERMINATED_TEXT));
-							return;
-						}
+			try {
+				if (id.getHost().getAddress().equals(System.getProperty(Util.THIS_NODE))) {
+					employAgent(message, id.getName());
+				} else {
+					try {
+						delegateToRecieverAgentNode(message, id);
+					} catch (Exception e) {
+						sendWSMessage(clientSession, WSMessageType.ERROR,
+								mapper.writeValueAsString(ErrorResponse.RECEIVERS_AGENT_TERMINATED_TEXT));
+						return;
 					}
 				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
-		sendWSMessage(clientSession, WSMessageType.ERROR_FREE,
-				mapper.writeValueAsString(ErrorResponse.MESSAGE_CONSUMED_TEXT));
+
+		try {
+			sendWSMessage(clientSession, WSMessageType.ERROR_FREE,
+					mapper.writeValueAsString(ErrorResponse.MESSAGE_CONSUMED_TEXT));
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void delegateToRecieverAgentNode(Message message, AID id) {
+		List<AID> receivers = message.getReceivers();
+		AID[] receiver = { id };
+		message.setReceivers(Arrays.asList(receiver));
 
 		ResteasyClient client = new ResteasyClientBuilder().build();
 
-		ResteasyWebTarget target = client.target("http://" + id.getHost().getAddress()
-				+ "/agent-center-dc/rest/agent-center/message/employ-agent/" + id.getName());
+		ResteasyWebTarget target = client
+				.target("http://" + id.getHost().getAddress() + "/agent-center-dc/rest/agent-center/message/send");
 		target.request().post(Entity.entity(message, MediaType.APPLICATION_JSON));
+		message.setReceivers(receivers);
 	}
 
 	public void employAgent(Message message, String agentName) {
@@ -150,7 +160,7 @@ public class WSEndpointService {
 			Queue queue = (Queue) context.lookup("jms/queue/message-queue");
 			connection.start();
 			MessageProducer producer = session.createProducer(queue);
-			
+
 			ObjectMapper mapper = new ObjectMapper();
 			String jsonInString = null;
 			try {

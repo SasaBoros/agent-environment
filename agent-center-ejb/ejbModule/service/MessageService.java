@@ -34,11 +34,8 @@ public class MessageService {
 
 	public Integer handleMessage(Message message) {
 		
-		
-		
 		for (AID id : message.getReceivers()) {
 			try{
-			System.out.println(id);
 			if (id.getHost().getAddress().equals(System.getProperty(Util.THIS_NODE))) {
 				employAgent(message, id.getName());
 			} else {
@@ -69,7 +66,7 @@ public class MessageService {
 		message.setReceivers(receivers);
 	}
 
-	public void employAgent(Message message, String agentName) {
+	private void employAgent(Message message, String agentName) {
 		try {
 			Context context = new InitialContext();
 			ConnectionFactory connectionFactory = (ConnectionFactory) context.lookup("ConnectionFactory");
