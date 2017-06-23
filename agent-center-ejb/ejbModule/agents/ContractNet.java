@@ -1,5 +1,7 @@
 package agents;
 
+import javax.ejb.Stateful;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -8,6 +10,7 @@ import entities.Agent;
 import entities.Message;
 import utilities.Util;
 
+@Stateful
 public class ContractNet extends Agent {
 	
 	private static final long serialVersionUID = 5816729639833406085L;

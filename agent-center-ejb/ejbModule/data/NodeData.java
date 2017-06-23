@@ -25,7 +25,7 @@ public class NodeData {
 
 	private Map<String, List<AgentType>> nodesAgentTypes = new HashMap<String, List<AgentType>>();
 	private List<Agent> runningAgents = new ArrayList<Agent>();
-
+	
 	@Inject
 	private ClientData clientData;
 
@@ -100,6 +100,7 @@ public class NodeData {
 		
 		return agentTypes;
 	}
+	
 
 	@SuppressWarnings("incomplete-switch")
 	private void sendChangeToWSClient(WSMessageType type, Agent agent) {

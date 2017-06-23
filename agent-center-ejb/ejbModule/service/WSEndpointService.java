@@ -7,15 +7,6 @@ import java.util.Map;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.QueueSession;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.websocket.Session;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
@@ -35,6 +26,7 @@ import entities.AgentCenter;
 import entities.AgentType;
 import entities.Message;
 import entities.Performative;
+import mdb.MDBProducer;
 import messaging.ErrorResponse;
 import messaging.WSMessage;
 import messaging.WSMessageType;
@@ -115,7 +107,7 @@ public class WSEndpointService {
 		for (AID id : message.getReceivers()) {
 			try {
 				if (id.getHost().getAddress().equals(System.getProperty(Util.THIS_NODE))) {
-					employAgent(message, id.getName());
+					MDBProducer.sendJMSMessage(message, id.getName());
 				} else {
 					try {
 						delegateToRecieverAgentNode(message, id);
@@ -151,37 +143,6 @@ public class WSEndpointService {
 		message.setReceivers(receivers);
 	}
 
-	public void employAgent(Message message, String agentName) {
-		try {
-			Context context = new InitialContext();
-			ConnectionFactory connectionFactory = (ConnectionFactory) context.lookup("ConnectionFactory");
-			Connection connection = connectionFactory.createConnection();
-			javax.jms.Session session = connection.createSession(false, QueueSession.AUTO_ACKNOWLEDGE);
-			Queue queue = (Queue) context.lookup("jms/queue/message-queue");
-			connection.start();
-			MessageProducer producer = session.createProducer(queue);
-
-			ObjectMapper mapper = new ObjectMapper();
-			String jsonInString = null;
-			try {
-				jsonInString = mapper.writeValueAsString(message);
-				javax.jms.Message m = session.createTextMessage(jsonInString);
-				m.setStringProperty("agentName", agentName);
-				producer.send(m);
-			} catch (JsonProcessingException e) {
-				e.printStackTrace();
-			}
-
-			connection.stop();
-			connection.close();
-			session.close();
-		} catch (JMSException e) {
-			e.printStackTrace();
-		} catch (NamingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 
 	private void startAgent(Session clientSession, String content) {
 		String type = content.split("/")[0];

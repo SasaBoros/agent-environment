@@ -37,10 +37,8 @@ rsMessagingModule.service('rsResourceService', ['$http', function($http) {
 
 rsMessagingModule.service('rsMessageService', ['$http', function($http) { 
 	this.sendMessage = function(message) {
-		if(message.performative == "" || message.sender == null || message.receivers.length == 0 || message.replyTo == null || message.content == "" 
-			|| message.language == "" || message.encoding == "" || message.ontology == "" || message.protocol == "" || message.conversationId == "" 
-					|| message.replyWith == "" || message.inReplyTo == "" || message.replyBy == null) {
-			toastr.warning("All fields are required.");
+		if(message.performative == "" || message.receivers.length == 0) {
+			toastr.warning("Performative and recievers are mandatory.");
 			return;
 		}
 		var self = this;

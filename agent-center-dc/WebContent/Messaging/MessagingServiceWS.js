@@ -48,10 +48,8 @@ messagingModuleWS.service('wsMessageService', function() {
 	}
 	
 	this.sendMessage = function(socket, message) {
-		if(message.performative == "" || message.sender == null || message.receivers.length == 0 || message.replyTo == null || message.content == "" 
-			|| message.language == "" || message.encoding == "" || message.ontology == "" || message.protocol == "" || message.conversationId == "" 
-					|| message.replyWith == "" || message.inReplyTo == "" || message.replyBy == null) {
-			toastr.warning("All fields are required.");
+		if(message.performative == "" || message.receivers.length == 0) {
+			toastr.warning("Performative and recievers are mandatory.");
 			return;
 		}
 		
