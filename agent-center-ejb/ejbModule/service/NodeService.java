@@ -15,9 +15,9 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
 import data.NodeData;
-import entities.AgentCenter;
-import entities.AgentType;
-import utilities.Util;
+import model.AgentCenter;
+import model.AgentType;
+import utility.Util;
 
 @Stateless
 public class NodeService {
@@ -87,13 +87,13 @@ public class NodeService {
 			try {
 				ResteasyWebTarget target = client
 						.target("http://" + n.getAddress() + "/agent-center-dc/rest/agent-center/node/register");
-				target.request().post(Entity.entity(node, MediaType.APPLICATION_JSON));
+				target.request().async().post(Entity.entity(node, MediaType.APPLICATION_JSON));
 
 				target = client.target("http://" + n.getAddress()
 						+ "/agent-center-dc/rest/agent-center/agent-type/node-agent-types/" + node.getAddress());
-				target.request().post(Entity.entity(nodeAgentTypes, MediaType.APPLICATION_JSON));
+				target.request().async().post(Entity.entity(nodeAgentTypes, MediaType.APPLICATION_JSON));
 			} catch (Exception e) {
-				// One of nodes stopped working.
+				e.printStackTrace();
 			}
 		}
 	}
@@ -104,31 +104,31 @@ public class NodeService {
 		ResteasyWebTarget target = client
 				.target("http://" + node.getAddress() + "/agent-center-dc/rest/agent-center/node/nodes");
 		try {
-			target.request().post(Entity.entity(nodeData.getNodes().stream().filter(n -> {
+			target.request().async().post(Entity.entity(nodeData.getNodes().stream().filter(n -> {
 				return !n.getAddress().equals(node.getAddress());
 			}).collect(Collectors.toList()), MediaType.APPLICATION_JSON));
 		} catch (Exception e) {
 			e.printStackTrace();
-			target.request().post(Entity.entity(nodeData.getNodes().stream().filter(n -> {
+			target.request().async().post(Entity.entity(nodeData.getNodes().stream().filter(n -> {
 				return !n.getAddress().equals(node.getAddress());
 			}).collect(Collectors.toList()), MediaType.APPLICATION_JSON));
 		}
 		target = client
 				.target("http://" + node.getAddress() + "/agent-center-dc/rest/agent-center/agent-type/agent-types");
 		try {
-			target.request().post(Entity.entity(nodeData.getNodeAgentTypes(), MediaType.APPLICATION_JSON));
+			target.request().async().post(Entity.entity(nodeData.getNodeAgentTypes(), MediaType.APPLICATION_JSON));
 		} catch (Exception e) {
 			e.printStackTrace();
-			target.request().post(Entity.entity(nodeData.getNodeAgentTypes(), MediaType.APPLICATION_JSON));
+			target.request().async().post(Entity.entity(nodeData.getNodeAgentTypes(), MediaType.APPLICATION_JSON));
 		}
 		
 		target = client
 				.target("http://" + node.getAddress() + "/agent-center-dc/rest/agent-center/agent/running-agents");
 		try {
-			target.request().post(Entity.entity(nodeData.getRunningAgents(), MediaType.APPLICATION_JSON));
+			target.request().async().post(Entity.entity(nodeData.getRunningAgents(), MediaType.APPLICATION_JSON));
 		} catch (Exception e) {
 			e.printStackTrace();
-			target.request().post(Entity.entity(nodeData.getRunningAgents(), MediaType.APPLICATION_JSON));
+			target.request().async().post(Entity.entity(nodeData.getRunningAgents(), MediaType.APPLICATION_JSON));
 		}
 	}
 

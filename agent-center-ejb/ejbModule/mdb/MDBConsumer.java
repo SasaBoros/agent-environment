@@ -13,13 +13,13 @@ import javax.jms.TextMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import data.NodeData;
-import entities.Agent;
+import model.Agent;
 
 @MessageDriven(activationConfig = {
 		@ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
 		@ActivationConfigProperty(propertyName = "destination", propertyValue = "jms/queue/message-queue") })
 public class MDBConsumer implements MessageListener {
-	
+
 	@Inject
 	private NodeData nodeData;
 
@@ -27,22 +27,27 @@ public class MDBConsumer implements MessageListener {
 	public void onMessage(Message jmsMessage) {
 		ObjectMapper mapper = new ObjectMapper();
 		TextMessage textMessage = (TextMessage) jmsMessage;
-		
+
 		try {
-			entities.Message message = mapper.readValue(textMessage.getText(), entities.Message.class);
+			model.ACLMessage message = mapper.readValue(textMessage.getText(), model.ACLMessage.class);
 			String agentName = jmsMessage.getStringProperty("agentName");
 			employAgent(message, agentName);
 		} catch (IOException | JMSException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	private void employAgent(entities.Message message, String agentName) {
+
+	private void employAgent(model.ACLMessage message, String agentName) {
 		for (Agent agent : nodeData.getRunningAgents()) {
 			if (agent.getId().getName().equals(agentName)) {
+				agent.setNodeData(nodeData);
 				agent.handleMessage(message);
+				return;
 			}
 		}
+
 	}
 
 }
+

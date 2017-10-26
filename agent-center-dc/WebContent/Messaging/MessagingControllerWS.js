@@ -29,28 +29,23 @@ messagingModuleWS.controller('wsMessageController', ['$scope', '$location' , 'ws
 	$scope.socket.onopen = function(message) {
 	 		console.log('Connection opened');
 	 	}
-		
 	$scope.socket.onmessage = function(message) {
 			wsMessageService.handleWSMessage($scope.data, message.data);
-			$scope.$apply();
 	 	}
-	 	
 	$scope.socket.onclose = function(message) {
 			console.log('Connection closed');
 	 	}
-	 	
 	$scope.socket.onerror = function(message) {
 			console.log(message);
 	 	}
 	
+	
 	$scope.sendMessage = function() {
 		wsMessageService.sendMessage($scope.socket, $scope.message);
 	}
-	
 	$scope.startAgent = function() {
 		wsMessageService.startAgent($scope.socket, $scope.agent);
 	}
-	
 	$scope.stopAgent = function(agentName) {
 		wsMessageService.stopAgent($scope.socket, agentName);
 	}

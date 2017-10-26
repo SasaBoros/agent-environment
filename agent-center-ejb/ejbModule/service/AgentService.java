@@ -7,18 +7,19 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
 import data.NodeData;
-import entities.AID;
-import entities.Agent;
-import entities.AgentCenter;
-import entities.AgentType;
-import messaging.ErrorResponse;
-import utilities.Util;
+import model.AID;
+import model.Agent;
+import model.AgentCenter;
+import model.AgentType;
+import model.ErrorResponse;
+import utility.Util;
 
 @Stateless
 public class AgentService {
@@ -37,10 +38,10 @@ public class AgentService {
 	public void addRunningAgent(Agent runningAgent) {
 		nodeData.addRunningAgent(runningAgent);
 	}
-	
+
 	public Agent delegatedStartAgent(String type, String name) {
 		try {
-			Agent agent = (Agent) Class.forName("agents." + type).newInstance();
+			Agent agent = (Agent) Class.forName("agent." + type).newInstance();
 			agent.setId(new AID(name, new AgentCenter(System.getProperty(Util.THIS_NODE)), new AgentType(type)));
 			return agent;
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
@@ -49,13 +50,13 @@ public class AgentService {
 		return null;
 	}
 
-	public Integer startAgent(String type, String name) {
+	public Response startAgent(String type, String name, Boolean isSlave) {
 
 		ResteasyClient client = new ResteasyClientBuilder().build();
 
 		for (Agent agent : nodeData.getRunningAgents()) {
 			if (agent.getId().getName().equals(name)) {
-				return ErrorResponse.AGENT_NAME_ALREADY_EXISTS;
+				return Response.serverError().entity(ErrorResponse.AGENT_NAME_ALREADY_EXISTS).build();
 			}
 		}
 
@@ -67,28 +68,49 @@ public class AgentService {
 							+ "/agent-center-dc/rest/agent-center/agent/delegate-start/" + type + "/" + name);
 					try {
 						Agent agent = target.request().put(null).readEntity(Agent.class);
-						notifyAll(agent);
-						return ErrorResponse.ERRORFREE;
+						addAgentToAllNodes(agent);
+						return Response.ok().build();
 					} catch (Exception e) {
-						return ErrorResponse.AGENT_FAILED_TO_START;
+						return Response.serverError().entity(ErrorResponse.AGENT_FAILED_TO_START).build();
 					}
 				}
 			}
-			return ErrorResponse.AGENT_TYPE_DOESNT_EXIST;
+			return Response.serverError().entity(ErrorResponse.AGENT_TYPE_DOESNT_EXIST).build();
 		}
 
 		try {
-			Agent agent = (Agent) Class.forName("agents." + type).newInstance();
+			Agent agent = (Agent) Class.forName("agent." + type).newInstance();
 			agent.setId(new AID(name, new AgentCenter(System.getProperty(Util.THIS_NODE)), new AgentType(type)));
-			notifyAll(agent);
+			agent.setSlave(isSlave);
+			addAgentToAllNodes(agent);
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-			return ErrorResponse.AGENT_TYPE_DOESNT_EXIST;
+			return Response.serverError().type(MediaType.TEXT_PLAIN).entity(ErrorResponse.AGENT_TYPE_DOESNT_EXIST).build();
 		}
 
-		return ErrorResponse.ERRORFREE;
+		return Response.ok().build();
 	}
 
-	private void notifyAll(Agent agent) {
+	public Response startSlaveAgent(String type, String name, Boolean isSlave) {
+
+		for (Agent agent : nodeData.getSlaveAgents()) {
+			if (agent.getId().getName().equals(name)) {
+				return Response.serverError().entity(ErrorResponse.AGENT_NAME_ALREADY_EXISTS).build();
+			}
+		}
+
+		try {
+			Agent agent = (Agent) Class.forName("agent." + type).newInstance();
+			agent.setId(new AID(name, new AgentCenter(System.getProperty(Util.THIS_NODE)), new AgentType(type)));
+			agent.setSlave(isSlave);
+			nodeData.addSlaveAgent(agent);
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			return Response.serverError().entity(ErrorResponse.AGENT_TYPE_DOESNT_EXIST).build();
+		}
+
+		return Response.ok().build();
+	}
+
+	private void addAgentToAllNodes(Agent agent) {
 
 		ResteasyClient client = new ResteasyClientBuilder().build();
 
@@ -98,17 +120,18 @@ public class AgentService {
 			if (System.getProperty(Util.MASTER_NODE) != null) {
 				ResteasyWebTarget target = client.target("http://" + System.getProperty(Util.MASTER_NODE)
 						+ "/agent-center-dc/rest/agent-center/agent/running-agent");
-				target.request().post(Entity.entity(agent, MediaType.APPLICATION_JSON));
+				target.request().async().post(Entity.entity(agent, MediaType.APPLICATION_JSON));
 			}
 
 			for (AgentCenter n : nodeData.getNodes()) {
+				client = new ResteasyClientBuilder().build();
 				ResteasyWebTarget target = client
 						.target("http://" + n.getAddress() + "/agent-center-dc/rest/agent-center/agent/running-agent");
-				target.request().post(Entity.entity(agent, MediaType.APPLICATION_JSON));
+				target.request().async().post(Entity.entity(agent, MediaType.APPLICATION_JSON));
 			}
 
 		} catch (Exception e) {
-
+			e.printStackTrace();
 		}
 	}
 

@@ -18,25 +18,25 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import data.ClientData;
+import data.WSClientData;
 import data.NodeData;
-import entities.AID;
-import entities.Agent;
-import entities.AgentCenter;
-import entities.AgentType;
-import entities.Message;
-import entities.Performative;
 import mdb.MDBProducer;
-import messaging.ErrorResponse;
-import messaging.WSMessage;
-import messaging.WSMessageType;
-import utilities.Util;
+import model.AID;
+import model.Agent;
+import model.AgentCenter;
+import model.AgentType;
+import model.ErrorResponse;
+import model.ACLMessage;
+import model.Performative;
+import model.WSMessage;
+import model.WSMessageType;
+import utility.Util;
 
 @Stateless
 public class WSEndpointService {
 
 	@Inject
-	private ClientData clientData;
+	private WSClientData clientData;
 
 	@Inject
 	private NodeData nodeData;
@@ -86,12 +86,12 @@ public class WSEndpointService {
 			stopAgent(clientSession, wsMessage.getContent());
 		} else if (wsMessage.getMessageType().equals(WSMessageType.MESSAGE)) {
 			try {
-				Message m = mapper.readValue(wsMessage.getContent(), Message.class);
+				ACLMessage m = mapper.readValue(wsMessage.getContent(), ACLMessage.class);
 				handleMessage(clientSession, m);
 			} catch (IOException e) {
 				try {
 					sendWSMessage(clientSession, WSMessageType.ERROR,
-							mapper.writeValueAsString(ErrorResponse.MESSAGE_FORMAT_ERROR_TEXT));
+							mapper.writeValueAsString(ErrorResponse.MESSAGE_FORMAT_ERROR));
 				} catch (JsonProcessingException e1) {
 					e1.printStackTrace();
 				}
@@ -101,7 +101,7 @@ public class WSEndpointService {
 		}
 	}
 
-	public void handleMessage(Session clientSession, Message message) {
+	public void handleMessage(Session clientSession, ACLMessage message) {
 		ObjectMapper mapper = new ObjectMapper();
 
 		for (AID id : message.getReceivers()) {
@@ -113,7 +113,7 @@ public class WSEndpointService {
 						delegateToRecieverAgentNode(message, id);
 					} catch (Exception e) {
 						sendWSMessage(clientSession, WSMessageType.ERROR,
-								mapper.writeValueAsString(ErrorResponse.RECEIVERS_AGENT_TERMINATED_TEXT));
+								mapper.writeValueAsString(ErrorResponse.RECEIVER_AGENT_TERMINATED));
 						return;
 					}
 				}
@@ -124,13 +124,13 @@ public class WSEndpointService {
 
 		try {
 			sendWSMessage(clientSession, WSMessageType.ERROR_FREE,
-					mapper.writeValueAsString(ErrorResponse.MESSAGE_CONSUMED_TEXT));
+					mapper.writeValueAsString(ErrorResponse.MESSAGE_SUCCESSFULY_CONSUMED));
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void delegateToRecieverAgentNode(Message message, AID id) {
+	private void delegateToRecieverAgentNode(ACLMessage message, AID id) {
 		List<AID> receivers = message.getReceivers();
 		AID[] receiver = { id };
 		message.setReceivers(Arrays.asList(receiver));
@@ -139,10 +139,9 @@ public class WSEndpointService {
 
 		ResteasyWebTarget target = client
 				.target("http://" + id.getHost().getAddress() + "/agent-center-dc/rest/agent-center/message/send");
-		target.request().post(Entity.entity(message, MediaType.APPLICATION_JSON));
+		target.request().async().post(Entity.entity(message, MediaType.APPLICATION_JSON));
 		message.setReceivers(receivers);
 	}
-
 
 	private void startAgent(Session clientSession, String content) {
 		String type = content.split("/")[0];
@@ -155,7 +154,7 @@ public class WSEndpointService {
 			if (agent.getId().getName().equals(name)) {
 				try {
 					sendWSMessage(clientSession, WSMessageType.ERROR,
-							mapper.writeValueAsString(ErrorResponse.AGENT_NAME_ALREADY_EXISTS_ERROR_TEXT));
+							mapper.writeValueAsString(ErrorResponse.AGENT_NAME_ALREADY_EXISTS));
 				} catch (JsonProcessingException e) {
 					e.printStackTrace();
 				}
@@ -173,12 +172,12 @@ public class WSEndpointService {
 						Agent agent = target.request().put(null).readEntity(Agent.class);
 						notifyAll(agent);
 						sendWSMessage(clientSession, WSMessageType.ERROR_FREE,
-								mapper.writeValueAsString(ErrorResponse.AGENT_SUCCESFULLY_STARTED_TEXT));
+								mapper.writeValueAsString(ErrorResponse.AGENT_SUCCESFULLY_STARTED));
 						return;
 					} catch (Exception e) {
 						try {
 							sendWSMessage(clientSession, WSMessageType.ERROR,
-									mapper.writeValueAsString(ErrorResponse.AGENT_FAILED_TO_START_TEXT));
+									mapper.writeValueAsString(ErrorResponse.AGENT_FAILED_TO_START));
 						} catch (JsonProcessingException e1) {
 							e1.printStackTrace();
 						}
@@ -197,7 +196,7 @@ public class WSEndpointService {
 		}
 
 		try {
-			Agent agent = (Agent) Class.forName("agents." + type).newInstance();
+			Agent agent = (Agent) Class.forName("agent." + type).newInstance();
 			agent.setId(new AID(name, new AgentCenter(System.getProperty(Util.THIS_NODE)), new AgentType(type)));
 			notifyAll(agent);
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
@@ -221,13 +220,13 @@ public class WSEndpointService {
 			if (System.getProperty(Util.MASTER_NODE) != null) {
 				ResteasyWebTarget target = client.target("http://" + System.getProperty(Util.MASTER_NODE)
 						+ "/agent-center-dc/rest/agent-center/agent/running-agent");
-				target.request().post(Entity.entity(agent, MediaType.APPLICATION_JSON));
+				target.request().async().post(Entity.entity(agent, MediaType.APPLICATION_JSON));
 			}
 
 			for (AgentCenter n : nodeData.getNodes()) {
 				ResteasyWebTarget target = client
 						.target("http://" + n.getAddress() + "/agent-center-dc/rest/agent-center/agent/running-agent");
-				target.request().post(Entity.entity(agent, MediaType.APPLICATION_JSON));
+				target.request().async().post(Entity.entity(agent, MediaType.APPLICATION_JSON));
 			}
 
 		} catch (Exception e) {

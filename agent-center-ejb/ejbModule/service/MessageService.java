@@ -6,51 +6,51 @@ import java.util.List;
 import javax.ejb.Stateless;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
-import entities.AID;
-import entities.Message;
-import entities.Performative;
 import mdb.MDBProducer;
-import messaging.ErrorResponse;
-import utilities.Util;
+import model.AID;
+import model.ErrorResponse;
+import model.ACLMessage;
+import model.Performative;
+import utility.Util;
 
 @Stateless
 public class MessageService {
 
-	public Integer handleMessage(Message message) {
-		
+	public Response handleMessage(ACLMessage message) {
 		for (AID id : message.getReceivers()) {
-			try{
-			if (id.getHost().getAddress().equals(System.getProperty(Util.THIS_NODE))) {
-				MDBProducer.sendJMSMessage(message, id.getName());
-			} else {
-				try {
-					delegateToRecieverAgentNode(message, id);
-				} catch (Exception e) {
-					return ErrorResponse.RECEIVERS_AGENT_TERMINATED;
+			try {
+				if (id.getHost().getAddress().equals(System.getProperty(Util.THIS_NODE))) {
+					MDBProducer.sendJMSMessage(message, id.getName());
+				} else {
+					try {
+						delegateToRecieverAgentNode(message, id);
+					} catch (Exception e) {
+						return Response.serverError().entity(ErrorResponse.RECEIVER_AGENT_TERMINATED).build();
+					}
 				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-		} catch(Exception e) {
-			e.printStackTrace();
 		}
-		}
-		
-		return ErrorResponse.ERRORFREE;
+
+		return Response.ok().build();
 	}
 
-	private void delegateToRecieverAgentNode(Message message, AID id) {
+	private void delegateToRecieverAgentNode(ACLMessage message, AID id) {
 		List<AID> receivers = message.getReceivers();
-		AID[] receiver = {id};
+		AID[] receiver = { id };
 		message.setReceivers(Arrays.asList(receiver));
 
 		ResteasyClient client = new ResteasyClientBuilder().build();
 
-		ResteasyWebTarget target = client.target("http://" + id.getHost().getAddress()
-				+ "/agent-center-dc/rest/agent-center/message/send");
+		ResteasyWebTarget target = client
+				.target("http://" + id.getHost().getAddress() + "/agent-center-dc/rest/agent-center/message/send");
 		target.request().post(Entity.entity(message, MediaType.APPLICATION_JSON));
 		message.setReceivers(receivers);
 	}

@@ -13,11 +13,11 @@ import javax.naming.NamingException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import entities.Message;
+import model.ACLMessage;
 
 public class MDBProducer {
 	
-	public static void sendJMSMessage(Message message, String agentName) {
+	public static void sendJMSMessage(ACLMessage message, String agentName) {
 		try {
 			Context context = new InitialContext();
 			ConnectionFactory connectionFactory = (ConnectionFactory) context.lookup("ConnectionFactory");
@@ -44,9 +44,11 @@ public class MDBProducer {
 		} catch (JMSException e) {
 			e.printStackTrace();
 		} catch (NamingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 }
+
+
+

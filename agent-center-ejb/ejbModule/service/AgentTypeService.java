@@ -7,7 +7,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 
 import data.NodeData;
-import entities.AgentType;
+import model.AgentType;
 
 @Stateless
 public class AgentTypeService {

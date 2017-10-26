@@ -46,11 +46,15 @@
 <script src="Messaging/MessagingControllerWS.js" type="text/javascript"></script>
 <script src="Messaging/MessagingServiceWS.js" type="text/javascript"></script>
 
+<style type="text/css">
+   body { background: url('v.jpg') !important; } /* Adding !important forces the browser to overwrite the default style applied by Bootstrap */
+</style>
+
 </head>
 <body ng-controller="appController">
-	<h2>Protocol:</h2>
+	<h1>Protocol:</h1>
 	<div class="radio">
-      <label><input type="radio" name="optradio" ng-click="setController('Rest')" ng-model="protocol" value="rs">Rest</label>
+      <label><input type="radio" name="optradio" ng-click="setController('Rest')" ng-model="protocol" value="rs">HTTP (REST)</label>
     </div>
     <div class="radio">
       <label><input type="radio" name="optradio" ng-click="setController('Websocket')" ng-model="protocol" value="ws">Websocket</label>

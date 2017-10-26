@@ -1,0 +1,14 @@
+#JSGF V1.0;
+
+/**
+ * JSGF Grammar 
+ */
+
+grammar grammar;
+
+public <number> = ( zero | one | two | three | four | five | six | seven | nine | ten
+                   | eleven | twelve | thirteen | fourteen | fifteen | sixteen | seventeen | eighteen | nineteen | twenty);                   
+public <syntax> = <number>{1} (plus | minus | multiply | division){1} <number>{1}; 
+
+
+

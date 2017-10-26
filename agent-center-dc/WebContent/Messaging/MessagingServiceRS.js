@@ -47,24 +47,10 @@ rsMessagingModule.service('rsMessageService', ['$http', function($http) {
 			  url: '../agent-center-dc/rest/agent-center/message/send',
 			  data: angular.toJson(message)
 			}).then(function successCallback(response) {
-				 self.handleErrorResponse(response.data)
+				toastr.info("Message successfuly sent.");
 			  }, function errorCallback(response) {
-				  
+				  toastr.error(response.data);
 			  });
-	}
-	this.handleErrorResponse = function(error) {
-		if(error == 1) {
-			toastr.error("Agent sender is no longer running.");
-		}
-		else if(error == 2) {
-			toastr.error("One or more agent recievers are no longer running.");
-		}
-		else if(error == 3) {
-			toastr.error("Agent to reply to is no longer running.");
-		}
-		else {
-			toastr.info("Message successfuly sent.");
-		}
 	}
 }]);
 
@@ -86,13 +72,12 @@ rsMessagingModule.service('rsAgentService', ['$http', function($http) {
 		var self = this;
 		return $http({
 			  method: 'PUT',
-			  url: '../agent-center-dc/rest/agent-center/agent/start/' + agent.type + "/" + agent.name
+			  url: '../agent-center-dc/rest/agent-center/agent/start/' + agent.type + "/" + agent.name + "/false" 
 			}).then(function successCallback(response) {
-				 self.handleErrorResponse(response.data);
+				toastr.info("Agent successfuly started.");
 				 agent.name = "";
-				 return response;
 			  }, function errorCallback(response) {
-				  
+				  toastr.error(response.data);
 			  });
 	}
 	
@@ -113,18 +98,4 @@ rsMessagingModule.service('rsAgentService', ['$http', function($http) {
 			  });
 	}
 	
-	this.handleErrorResponse = function(error) {
-		if(error == 4) {
-			toastr.error("Agent with that name is already started.");
-		}
-		else if(error == 5) {
-			toastr.error("Choosen agent type doesn't exist anymore.");
-		}
-		else if(error == 6) {
-			toastr.error("Agent failed to start.");
-		}
-		else if(error == 0){
-			toastr.info("Agent successfuly started.");
-		}
-	}
 }]);

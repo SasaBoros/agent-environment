@@ -79,8 +79,9 @@ rsMessagingModule.controller('rsMessageController', [ '$scope', '$interval', '$w
 			
 			$scope.startAgent = function() {
 				rsAgentService.startAgent($scope.agent, $scope.data.runningAgents).then(function(response) {
-				getRunningAgents();
-			})};
+					getRunningAgents();
+				})
+			};
 			
 			$scope.stopAgent = function(agentName) {
 				rsAgentService.stopAgent($scope.data.runningAgents, agentName);

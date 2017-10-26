@@ -1,35 +1,40 @@
 package data;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
+import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.websocket.Session;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import entities.Agent;
-import entities.AgentCenter;
-import entities.AgentType;
-import messaging.WSMessage;
-import messaging.WSMessageType;
-import utilities.Util;
+import model.Agent;
+import model.AgentCenter;
+import model.AgentType;
+import model.WSMessage;
+import model.WSMessageType;
+import utility.Util;
 
 @Singleton
-public class NodeData {
+@Startup
+@DependsOn("WSClientData")
+public class NodeData implements Serializable {
+
+	private static final long serialVersionUID = 2514301890876260517L;
 
 	private List<AgentCenter> nodes = new ArrayList<AgentCenter>();
-
 	private Map<String, List<AgentType>> nodesAgentTypes = new HashMap<String, List<AgentType>>();
 	private List<Agent> runningAgents = new ArrayList<Agent>();
-	
-	@Inject
-	private ClientData clientData;
+	private List<Agent> slaveAgents = new ArrayList<Agent>();
 
-	private ObjectMapper mapper = new ObjectMapper();
+	@Inject
+	private WSClientData clientData;
 
 	public List<AgentCenter> getNodes() {
 		return nodes;
@@ -50,61 +55,72 @@ public class NodeData {
 	public Map<String, List<AgentType>> getNodeAgentTypes() {
 		return nodesAgentTypes;
 	}
-	
+
 	public List<AgentType> getThisNodeAgentTypes() {
 		return nodesAgentTypes.get(System.getProperty(Util.THIS_NODE));
 	}
 
 	public void setNodeAgentTypes(Map<String, List<AgentType>> nodesAgentTypes) {
 		this.nodesAgentTypes = nodesAgentTypes;
-		sendChangeToWSClient(WSMessageType.AGENT_TYPES, null);
+		updateWSCLients(WSMessageType.AGENT_TYPES, null);
 	}
 
 	public void addNodeAgentTypes(String nodeAddress, List<AgentType> agentTypes) {
 		nodesAgentTypes.put(nodeAddress, agentTypes);
-		sendChangeToWSClient(WSMessageType.AGENT_TYPES, null);
+		updateWSCLients(WSMessageType.AGENT_TYPES, null);
 	}
+
 
 	public void removeNodeAgentTypes(String nodeAddress) {
 		nodesAgentTypes.remove(nodeAddress);
-		sendChangeToWSClient(WSMessageType.AGENT_TYPES, null);
-	}
-
-	public List<Agent> getRunningAgents() {
-		return runningAgents;
-	}
-
-	public void setRunningAgents(List<Agent> runningAgents) {
-		this.runningAgents = runningAgents;
-		sendChangeToWSClient(WSMessageType.RUNNING_AGENTS, null);
+		updateWSCLients(WSMessageType.AGENT_TYPES, null);
 	}
 
 	public void addRunningAgent(Agent agent) {
 		runningAgents.add(agent);
-		sendChangeToWSClient(WSMessageType.STARTED_AGENT, agent);
+		updateWSCLients(WSMessageType.STARTED_AGENT, agent);
 	}
 
 	public void removeRunningAgent(Agent agent) {
 		runningAgents.remove(agent);
-		sendChangeToWSClient(WSMessageType.DELETED_AGENT, agent);
+		updateWSCLients(WSMessageType.DELETED_AGENT, agent);
 	}
+	
+	public void setRunningAgents(List<Agent> runningAgents) {
+		this.runningAgents = runningAgents;
+		updateWSCLients(WSMessageType.RUNNING_AGENTS, null);
+	}
+	
+	public List<Agent> getRunningAgents() {
+		return runningAgents;
+	}
+
 
 	public List<AgentType> getAllAgentTypes() {
 		List<AgentType> agentTypes = new ArrayList<AgentType>();
 		for (Map.Entry<String, List<AgentType>> entry : nodesAgentTypes.entrySet()) {
-			for(AgentType type : entry.getValue()) {
-				if(!agentTypes.contains(type))
+			for (AgentType type : entry.getValue()) {
+				if (!agentTypes.contains(type))
 					agentTypes.add(type);
 			}
 		}
-		
+
 		return agentTypes;
 	}
-	
+
+	public Agent findAgentByName(String name) {
+		for (Agent agent : runningAgents) {
+			if (agent.getId().getName().equals(name))
+				return agent;
+		}
+		return null;
+	}
 
 	@SuppressWarnings("incomplete-switch")
-	private void sendChangeToWSClient(WSMessageType type, Agent agent) {
+	private void updateWSCLients(WSMessageType type, Agent agent) {
 		
+		ObjectMapper mapper = new ObjectMapper();
+
 		for (Session cs : clientData.getClientSessions()) {
 			try {
 				switch (type) {
@@ -130,6 +146,22 @@ public class NodeData {
 			}
 		}
 
+	}
+
+	public WSClientData getClientData() {
+		return clientData;
+	}
+
+	public List<Agent> getSlaveAgents() {
+		return slaveAgents;
+	}
+	
+	public void addSlaveAgent(Agent agent) {
+		slaveAgents.add(agent);
+	}
+	
+	public void removeSlaveAgent(Agent agent) {
+		slaveAgents.remove(agent);
 	}
 
 }
